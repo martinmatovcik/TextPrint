@@ -1,0 +1,16 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TextPrint", "TextPrint\TextPrint.csproj", "{96AF610E-91AB-4317-99E4-6DE2D60E7081}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{96AF610E-91AB-4317-99E4-6DE2D60E7081}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{96AF610E-91AB-4317-99E4-6DE2D60E7081}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{96AF610E-91AB-4317-99E4-6DE2D60E7081}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{96AF610E-91AB-4317-99E4-6DE2D60E7081}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
