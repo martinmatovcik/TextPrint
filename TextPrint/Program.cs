@@ -210,7 +210,7 @@ public class Program
             AdrInstruction = "", //todo transport.ADRDgClass != null ? rm.GetString("adr-instruction", ci) : ""
 
             //14
-            CloText1Prefix = true, 
+            CloText1Prefix = true,
             CloText1 = "CZ590201 - PARDUBICE",
             CloText2 = "Palackého 2659",
             CloText3 = "",
@@ -225,13 +225,13 @@ public class Program
             //16
             VystaveneDne = new LocalDate(2024, 1, 17),
             VystaveneV = "Česká Třebová",
-            
+
             //20
-                        WeightingInstruction = "JET PO NAKLÁDCE NA VÁHU!/LITRY",
-                        PickUpInstruction = "Vyzvednout: max 118 znaků včetně mezer",
-                        ReturnToInstruction = "Vrátit: max znaků 118 včetně mezer",
-                        Services = "",
-                        Notes = "Vrátit: max znaků 118 včetně mezer"
+            WeightingInstruction = "JET PO NAKLÁDCE NA VÁHU!/LITRY",
+            PickUpInstruction = "Vyzvednout: max 118 znaků včetně mezer",
+            ReturnToInstruction = "Vrátit: max znaků 118 včetně mezer",
+            Services = "Služby: Dva riadky (max 164 znakov vrátane medzier / - názov)",
+            Notes = "Poznámky: (82 znakov na riadok, max rozsah 246 znakov vrátane medzier)"
         }
     }
 }
