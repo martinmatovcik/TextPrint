@@ -1,4 +1,7 @@
-﻿using System.Text;
+﻿using System.Globalization;
+using System.Runtime.CompilerServices;
+using System.Security.AccessControl;
+using System.Text;
 using NodaTime;
 using TextPrint;
 
@@ -6,13 +9,21 @@ public class Program
 {
     static void Main()
     {
-        GenereateCmrTextFile(GenerateCmrFormDataDto());
+        GenereateCmrTextFile(GenerateCmrFormDataDto(), CultureInfo.CurrentCulture);
     }
 
     private static Encoding ibm852 = CodePagesEncodingProvider.Instance.GetEncoding(852);
+    private static CultureInfo _cultureInfo { get; set; }
 
-    public static void GenereateCmrTextFile(CmrFormDataDto formData)
+    //todo --- rm.GetString.... 
+    private static string code = "CODE";
+    private static string tara = "TARA";
+    private static string clo = "CLO";
+    private static string dekl = "DEKL";
+
+    public static void GenereateCmrTextFile(CmrFormDataDto formData, CultureInfo cultureInfo)
     {
+        _cultureInfo = cultureInfo;
         string filePath = "/Users/macbook/RiderProjects/TextPrint/TextPrint/files/cmr-test.txt";
 
         try
@@ -43,12 +54,14 @@ public class Program
             int field1RightStartingPoint = upperRightFieldStartingPoint + 6;
             int field6StartingPoint = upperRightFieldStartingPoint + insideFormLeftMargin;
             int field10StartingPointFromLeftMargin = 10;
-            int field11StartingPointFromField10 =  14;
+            int field11StartingPointFromField10 = 14;
             int field12StartingPointFromField11 = 14;
             int field13StartingPointFromField12 = 20;
-            int field13StartingPointFromLeftMargin = field10StartingPointFromLeftMargin + field11StartingPointFromField10 + field12StartingPointFromField11 + field13StartingPointFromField12;
+            int field13StartingPointFromLeftMargin = field10StartingPointFromLeftMargin +
+                                                     field11StartingPointFromField10 + field12StartingPointFromField11 +
+                                                     field13StartingPointFromField12;
             int field16_1StartingPointFromLeftMargin = 7;
-            int field16_2StartingPointFromLeftMargin = field16_1StartingPointFromLeftMargin + 36;
+            int field16_2StartingPointFromField16_1 =  36;
 
             int upperSpacesBetween = field1RightStartingPoint - field1LeftStartingPoint;
 
@@ -90,12 +103,6 @@ public class Program
             {
                 new(formFeed),
             });
-
-            //rm.GetString....
-            var code = "CODE";
-            var tara = "TARA";
-            var clo = "CLO";
-            var dekl = "DEKL";
 
             var content =
                 //Start
@@ -158,22 +165,12 @@ public class Program
                 AddNewLines(2) +
                 $"{code}: {formData.UnloadingCode}" +
 
-                //14 todo - logic
-                AddNewLines(6) +
-                $"{clo}: {formData.CloText1}" + EndLine() +
-                AddSpaces(clo.Length + 2) + formData.CloText2 + EndLine() +
-                AddSpaces(clo.Length + 2) + formData.CloText3 + EndLine() +
-                AddSpaces(clo.Length + 2) + formData.CloText4 + EndLine() +
-                $"{dekl}: {formData.DeclText1}" + EndLine() +
-                AddSpaces(dekl.Length + 2) + formData.DeclText2 + EndLine() +
-                AddSpaces(dekl.Length + 2) + formData.DeclText3 + EndLine() +
-                AddSpaces(dekl.Length + 2) + formData.DeclText4 + EndLine() +
+                //14 
+                GenerateField14(formData) +
 
                 //16
-                AddNewLines(4) +
                 AddSpaces(field16_1StartingPointFromLeftMargin) + formData.VystaveneV +
-                AddSpaces(field16_2StartingPointFromLeftMargin - formData.VystaveneV.Length -
-                          field16_1StartingPointFromLeftMargin) + formData.VystaveneDne + EndLine() +
+                AddSpaces(field16_2StartingPointFromField16_1 - formData.VystaveneV.Length) + formData.VystaveneDne.ToString("dd.MM.yyyy", cultureInfo)+ EndLine() +
 
                 //End
                 AddControlCode(endFileCommands);
@@ -185,6 +182,59 @@ public class Program
         {
             Console.WriteLine($"An error occurred: {ex.Message}");
         }
+    }
+
+    private static string GenerateField14(CmrFormDataDto formData)
+    {
+        var prefix = "";
+        var padding = 0;
+        var output = "";
+
+        if (!string.IsNullOrEmpty(formData.CloText1))
+        {
+            if (formData.CloText1Prefix)
+            {
+                prefix = $"{clo}: ";
+                padding = prefix.Length;
+            }
+
+            output += AddField14Line(0, prefix + formData.CloText1) +
+                      AddField14Line(padding, formData.CloText2) +
+                      AddField14Line(padding, formData.CloText3) +
+                      AddField14Line(padding, formData.CloText4);
+
+            padding = 0;
+        }
+
+        if (!string.IsNullOrEmpty(formData.DeclText1))
+        {
+            if (formData.DeclText1Prefix)
+            {
+                prefix = $"{dekl}: ";
+                padding = prefix.Length;
+            }
+
+            output += AddField14Line(padding, prefix + formData.DeclText1) +
+                      AddField14Line(padding, formData.DeclText2) +
+                      AddField14Line(padding, formData.DeclText3) +
+                      AddField14Line(padding, formData.DeclText4);
+        }
+
+        var maxLines = 8;
+        var actualLines = output.Count(c => c == '\n');
+        output += AddNewLines(maxLines - actualLines);
+
+        return output;
+    }
+
+    private static string AddField14Line(int cloTextPadding, string? text)
+    {
+        if (string.IsNullOrEmpty(text))
+        {
+            return "";
+        }
+
+        return AddSpaces(cloTextPadding) + text + EndLine();
     }
 
     private static string AddControlCode(byte[] controlCode)
@@ -314,7 +364,7 @@ public class Program
             CloText1Prefix = true,
             CloText1 = "CZ590201 - PARDUBICE",
             CloText2 = "Palackého 2659",
-            CloText3 = "",
+            CloText3 = "asdsad",
             CloText4 = "",
 
             DeclText1Prefix = true,
