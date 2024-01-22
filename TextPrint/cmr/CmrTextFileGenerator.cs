@@ -1,27 +1,12 @@
-Ôªøusing System.Globalization;
-using System.Runtime.CompilerServices;
-using System.Security.AccessControl;
+using System.Globalization;
 using System.Text;
 using NodaTime;
-using TextPrint;
-using TextPrint.cmr;
-using TextPrint.lpr;
 
-public class Program
+namespace TextPrint.cmr;
+
+public class CmrTextFileGenerator
 {
-    static void Main()
-    {
-        // CmrTextFileGenerator.GenereateCmrTextFile(GenerateCmrFormDataDto(), CultureInfo.CurrentCulture);
-        // Print.GenereateCmrTextFile();
-        
-        for (int i = 0; i < 3; i++)
-        {
-            // PrintClient.PrintFile("/Users/macbook/RiderProjects/TextPrint/TextPrint/files/cmr-test.txt");
-            PrintClient.PrintFile("/Users/macbook/RiderProjects/TextPrint/TextPrint/files/test.txt");
-        }
-    }
-
-    private static Encoding? Ibm852 { get; set; } = CodePagesEncodingProvider.Instance.GetEncoding(852);
+    private static Encoding? FileEncoding { get; set; } = CodePagesEncodingProvider.Instance.GetEncoding(852);
     private static CultureInfo? CultureInfo { get; set; }
 
     //todo --- rm.GetString.... 
@@ -44,32 +29,35 @@ public class Program
                 Console.WriteLine("File deleted successfully!");
             }
 
+            int outsideFormLeftMargin = 6;
+            int insideFormLeftPadding = 1;
+            int printerLeftMargin = outsideFormLeftMargin + insideFormLeftPadding;
+
+            int fields1To8Width = 36;
+            int fields1To8WidthUsable = fields1To8Width - insideFormLeftPadding;
+
+            int field1_1StartingPointFromPrinterLeftMargin = 10;
+
+            int field1_2StartingPointFromPrinterLeftMargin = fields1To8WidthUsable;
+            int field1_2DriverStartingPointFromLeftMargin =
+                field1_2StartingPointFromPrinterLeftMargin + 10; //ideal is 51
+            int field1_2TextStartingPointFromLeftMargin = field1_2StartingPointFromPrinterLeftMargin + 6;
+            int field5StartingPointFromLeftMargin = 21;
+            int field8StartingPointFromField5 = 26;
+
+            int field16_1StartingPointFromLeftMargin = 7;
+            int field16_2StartingPointFromField16_1 = 38;
+
+            int upperSpacesBetween =
+                field1_2TextStartingPointFromLeftMargin - field1_1StartingPointFromPrinterLeftMargin;
+
+            //------PRINTER-CONTROL CHARACTERS-------
             //Italics ON - 27,52 -> OFF - 27,53
             //Double width ON - 27,87,49 -> OFF - 27,87,48
             //Double height ON - 27,119,49 -> OFF - 27,119,48
             //IBM 852 characterSet -> 27,82,46
             //Set left margin -> 27,108,n1 --- (n1 specifics in manual page 121)
             //Set right margin -> 27,81,n2 --- (n2 specifics in manual page 121)
-
-            int outsideFormLeftMargin = 6;
-            int insideFormLeftMargin = 1;
-            int leftMargin = outsideFormLeftMargin + insideFormLeftMargin;
-            int upperFieldWidth = 36;
-            int upperFieldWidthUsable = upperFieldWidth - insideFormLeftMargin;
-
-            int field1LeftStartingPoint = 10; //ideal is 17
-
-            int upperRightFieldStartingPoint = upperFieldWidthUsable;
-            int field1RightDriverStartingPoint = upperRightFieldStartingPoint + 10; //ideal is 51
-            int field1RightStartingPoint = upperRightFieldStartingPoint + 6;
-            int field5StartingPointFromLeftMargin = 21;
-            int field6StartingPoint = upperRightFieldStartingPoint + insideFormLeftMargin;
-            int field8StartingPointFromField5 = 26;
-
-            int field16_1StartingPointFromLeftMargin = 7;
-            int field16_2StartingPointFromField16_1 = 38;
-
-            int upperSpacesBetween = field1RightStartingPoint - field1LeftStartingPoint;
 
             var italicsOn = new byte[] { 27, 52 };
             var italicsOff = new byte[] { 27, 53 };
@@ -78,62 +66,71 @@ public class Program
             var doubleHeightOn = new byte[] { 27, 119, 49 };
             var doubleHeightOff = new byte[] { 27, 119, 48 };
             var ibm852CharacterSet = new byte[] { 27, 82, 46 };
-            var setLeftMargin = new byte[] { 27, 108, (byte)leftMargin };
+            var setLeftMargin = new byte[] { 27, 108, (byte)printerLeftMargin };
             var formFeed = new byte[] { 12 };
             var lineFeed = new byte[] { 10 };
             var carriageReturn = new byte[] { 13 };
+            //possible chyba -> je mozne ze ako sa spravi var, chyba tam 36-n znakov riadku ->> pridat variable line feed s n=36-n
             var variableLineFeed28 = new byte[] { 27, 74, 28 };
-            var variableLineFeedEndFile = new byte[] { 27, 74, 36 };
+            var variableLineFeedEndFile = new byte[] { 27, 74, 8 };
+            var variableRevLineFeedEndFile = new byte[] { 27, 106, 216 };
+            // var variableRevLineFeedEndFile = new byte[] { 27, 106, 144 };
+            var highSpeed = new byte[] { 27, 35, 48 };
+            var tof = new byte[] { 27, 52};
 
-            var initialFileCommands = JoinByteLists(new List<List<byte>>()
+            //todo
+            var pageLength = new byte[] { 27, 67, 0, 12 }; //73 - good tear position ; 72 - should be right
+
+            var initialFilePrinterCommands = JoinByteLists(new List<List<byte>>()
             {
-                new(ibm852CharacterSet), new(italicsOff), new(doubleWidthOff), new(doubleHeightOff), new(setLeftMargin)
+                new(pageLength), new(highSpeed), new(ibm852CharacterSet), new(italicsOff), new(doubleWidthOff), new(doubleHeightOff),
+                new(setLeftMargin)
             });
 
-            var cmrNumberFormattingOnCommand = JoinByteLists(new List<List<byte>>()
+            var cmrNumberFormattingOnPrinterCommand = JoinByteLists(new List<List<byte>>()
             {
                 new(doubleWidthOn), new(doubleHeightOn),
             });
 
-            var cmrNumberFormattingOffCommand = JoinByteLists(new List<List<byte>>()
+            var cmrNumberFormattingOffPrinterCommand = JoinByteLists(new List<List<byte>>()
             {
                 new(doubleWidthOff), new(doubleHeightOff),
             });
 
-            var endFileCommands = JoinByteLists(new List<List<byte>>()
-            {
+            var endFilePrinterCommands = JoinByteLists(new List<List<byte>>()
+            {//todo next
                 new(formFeed), new(variableLineFeedEndFile)
             });
 
-            var content =
+            var cmrText =
                 //Start
-                AddControlCode(initialFileCommands) +
+                AddControlCode(initialFilePrinterCommands) +
                 // todo -- if continuous print -> 6, if first print -> 5
-                AddNewLines(5) +
+                AddNewLines(6) +
 
                 //1
-                AddSpaces(field1RightDriverStartingPoint) + formData.Ridic + EndLine() +
-                AddSpaces(field1LeftStartingPoint) + formData.ObjednavkaCislo + EndLine() +
-                AddSpaces(field1LeftStartingPoint) + formData.ReleaseCislo +
+                AddSpaces(field1_2DriverStartingPointFromLeftMargin) + formData.Ridic + EndLine() +
+                AddSpaces(field1_1StartingPointFromPrinterLeftMargin) + formData.ObjednavkaCislo + EndLine() +
+                AddSpaces(field1_1StartingPointFromPrinterLeftMargin) + formData.ReleaseCislo +
                 AddSpaces(upperSpacesBetween - formData.ReleaseCislo.Length) +
                 $"({formData.CisloRidice}) {formData.RegistracniZnackaTahac}/{formData.RegistracniZnackaNaves}" +
                 EndLine() +
-                AddSpaces(field1LeftStartingPoint) + formData.KontaktOsoba + EndLine() +
-                AddSpaces(field1RightStartingPoint) +
-                AddControlCode(cmrNumberFormattingOnCommand) + formData.CmrNumber +
-                AddControlCode(cmrNumberFormattingOffCommand) + EndLine() +
-                AddSpaces(field1LeftStartingPoint) + formData.KontaktTelefon1 + EndLine() +
-                AddSpaces(field1LeftStartingPoint) + formData.KontaktTelefon2 + EndLine() +
+                AddSpaces(field1_1StartingPointFromPrinterLeftMargin) + formData.KontaktOsoba + EndLine() +
+                AddSpaces(field1_2TextStartingPointFromLeftMargin) +
+                AddControlCode(cmrNumberFormattingOnPrinterCommand) + formData.CmrNumber +
+                AddControlCode(cmrNumberFormattingOffPrinterCommand) + EndLine() +
+                AddSpaces(field1_1StartingPointFromPrinterLeftMargin) + formData.KontaktTelefon1 + EndLine() +
+                AddSpaces(field1_1StartingPointFromPrinterLeftMargin) + formData.KontaktTelefon2 + EndLine() +
 
                 //2 + 6
                 AddNewLines(2) +
-                formData.OdesilatelPrijemce1 + AddSpaces(upperFieldWidth - formData.OdesilatelPrijemce1.Length) +
+                formData.OdesilatelPrijemce1 + AddSpaces(fields1To8Width - formData.OdesilatelPrijemce1.Length) +
                 formData.Dopravce1 + EndLine() +
-                formData.OdesilatelPrijemce2 + AddSpaces(upperFieldWidth - formData.OdesilatelPrijemce2.Length) +
+                formData.OdesilatelPrijemce2 + AddSpaces(fields1To8Width - formData.OdesilatelPrijemce2.Length) +
                 formData.Dopravce2 + EndLine() +
-                formData.OdesilatelPrijemce3 + AddSpaces(upperFieldWidth - formData.OdesilatelPrijemce3.Length) +
+                formData.OdesilatelPrijemce3 + AddSpaces(fields1To8Width - formData.OdesilatelPrijemce3.Length) +
                 formData.Dopravce3 + EndLine() +
-                formData.OdesilatelPrijemce4 + AddSpaces(upperFieldWidth - formData.OdesilatelPrijemce4.Length) +
+                formData.OdesilatelPrijemce4 + AddSpaces(fields1To8Width - formData.OdesilatelPrijemce4.Length) +
                 formData.Dopravce4 + EndLine() +
 
                 //3
@@ -171,15 +168,148 @@ public class Program
                 GenerateField20(formData) +
 
                 //End
-                AddControlCode(endFileCommands);
+                AddControlCode(endFilePrinterCommands);
 
-            File.WriteAllText(filePath, content, Ibm852);
+            File.WriteAllText(filePath, cmrText, FileEncoding);
             Console.WriteLine("File wrote successfully.");
         }
         catch (Exception ex)
         {
             Console.WriteLine($"An error occurred: {ex.Message}");
         }
+    }
+
+    private static string GenerateFields9To13(CmrFormDataDto formData)
+    {
+        var output = "";
+
+        int field10StartingPointFromLeftMargin = 8;
+        int field11StartingPointFromField10 = 15;
+        int field11StartingPointFromLeftMargin = field10StartingPointFromLeftMargin + field11StartingPointFromField10;
+        int field13StartingPointFromField11 = 36;
+
+        var goods = formData.Zbozi
+            .DistinctBy(x => x.DruhObalu + x.Oznaceni)
+            .GroupBy(x => x.DruhObalu)
+            .Select(druhy => (druhy.Key + ' ').PadRight(4, ' ') + String.Join(", ", druhy.Select(zb => zb.Oznaceni)));
+
+        var goodsFormatted = String.Join(Environment.NewLine, goods);
+
+        for (var i = 0; i < goodsFormatted.Length; i++)
+        {
+            if (i != 0 && i % 34 == 0 && goodsFormatted[i - 1] != '\n')
+            {
+                goodsFormatted = goodsFormatted.Insert(i, "\n" + AddSpaces(4));
+            }
+        }
+
+        var goodsLinesSplit = goodsFormatted.Split("\n");
+
+        var goodsLines = new string[6];
+
+        for (int i = 0; i < goodsLines.Length; i++)
+        {
+            goodsLines[i] = goodsLinesSplit.Length > i ? goodsLinesSplit[i] : "";
+        }
+
+        //Line 1
+        output += formData.DruhKontejneru +
+                  AddSpaces(field10StartingPointFromLeftMargin - formData.DruhKontejneru.Length) +
+                  formData.CisloKontejneru +
+                  AddSpaces(field11StartingPointFromField10 - formData.CisloKontejneru.Length) +
+                  goodsLines[0] +
+                  AddSpaces(field13StartingPointFromField11 - goodsLines[0].Length) +
+                  formData.ImportVaha + EndLine();
+
+        //Line 2
+        var taraText = AppendLineWithPrefixOrEmptyString(tara, formData.TaraKontejneru.ToString());
+        output += AddSpaces(field11StartingPointFromLeftMargin) + goodsLines[1] +
+                  AddSpaces(field13StartingPointFromField11 - goodsLines[1].Length) + taraText;
+
+        //Line 3
+        output += formData.TemperatureInstruction +
+                  AddSpaces(field11StartingPointFromLeftMargin - formData.TemperatureInstruction.Length) +
+                  goodsLines[2] + EndLine();
+
+        //Line 4
+        output += formData.WasteInstruction +
+                  AddSpaces(field11StartingPointFromLeftMargin - formData.WasteInstruction.Length) + goodsLines[3] +
+                  EndLine();
+
+        //Line 5
+        var rejdText = AppendLineWithPrefixOrEmptyString(rejd, formData.OwnerText);
+        rejdText = rejdText.Substring(0, rejdText.Length - 1);
+        output += rejdText + AddSpaces(field11StartingPointFromLeftMargin - rejdText.Length) +
+                  goodsLines[4] + EndLine();
+
+        //Line 6
+        var codeText = AppendLineWithPrefixOrEmptyString(code, formData.UnloadingCode);
+        codeText = codeText.Substring(0, codeText.Length - 1);
+        output += codeText + AddSpaces(field11StartingPointFromLeftMargin - codeText.Length) +
+                  goodsLines[5] + EndLine();
+
+        //Line 7
+        output += AddNewLines(1);
+
+        //Line 8 + 9 (?)
+        var adrInstructionLine = formData.AdrInstruction;
+        var lineLength = 55;
+        if (adrInstructionLine.Length > lineLength)
+        {
+            adrInstructionLine = adrInstructionLine.Insert(lineLength, "\n");
+        }
+
+        if (adrInstructionLine.Length > lineLength * 2)
+        {
+            adrInstructionLine = adrInstructionLine.Substring(0, lineLength * 2 + 1);
+        }
+
+        output += adrInstructionLine + EndLine();
+
+        var maxLines = 10;
+        var actualLines = output.Count(c => c == '\n');
+        output += AddNewLines(maxLines - actualLines);
+
+        return output;
+    }
+
+    private static string GenerateField14(CmrFormDataDto formData)
+    {
+        var prefix = "";
+        var padding = 6;
+        var output = "";
+
+        if (!string.IsNullOrEmpty(formData.CloText1))
+        {
+            if (formData.CloText1Prefix)
+            {
+                prefix = $"{clo}:  ";
+            }
+
+            output += AppendLineWithPadding(0, prefix + formData.CloText1) +
+                      AppendLineWithPadding(padding, formData.CloText2) +
+                      AppendLineWithPadding(padding, formData.CloText3) +
+                      AppendLineWithPadding(padding, formData.CloText4);
+        }
+
+        if (!string.IsNullOrEmpty(formData.DeclText1))
+        {
+            if (formData.DeclText1Prefix)
+            {
+                prefix = $"{dekl}: ";
+            }
+
+            output += AppendLineWithPadding(0, prefix + formData.DeclText1) +
+                      AppendLineWithPadding(padding, formData.DeclText2) +
+                      AppendLineWithPadding(padding, formData.DeclText3) +
+                      AppendLineWithPadding(padding, formData.DeclText4);
+        }
+
+        var maxLines = 8;
+        var actualLines = output.Count(c => c == '\n');
+        output += AddNewLines(maxLines - actualLines);
+
+        return output;
     }
 
     private static string GenerateField20(CmrFormDataDto formData)
@@ -271,102 +401,29 @@ public class Program
             notesLine = notesLine.Substring(0, lineLength * 3 + 2);
         }
 
-        output += notesLine + EndLine();
+        output += notesLine;
         return output;
     }
 
-    private static string GenerateFields9To13(CmrFormDataDto formData)
+    private static string AddControlCode(byte[] controlCode)
     {
-        var output = "";
+        return FileEncoding.GetString(controlCode);
+    }
 
-        int field10StartingPointFromLeftMargin = 9;
-        int field11StartingPointFromField10 = 15;
-        int field11StartingPointFromLeftMargin = field10StartingPointFromLeftMargin + field11StartingPointFromField10;
-        int field13StartingPointFromField11 = 36;
+    private static byte[] JoinByteLists(List<List<byte>> listOfLists)
+    {
+        var totalLength = listOfLists.Sum(list => list.Count);
 
-        var goods = formData.Zbozi
-            .DistinctBy(x => x.DruhObalu + x.Oznaceni)
-            .GroupBy(x => x.DruhObalu)
-            .Select(druhy => (druhy.Key + ' ').PadRight(5, ' ') + String.Join(", ", druhy.Select(zb => zb.Oznaceni)));
+        var result = new byte[totalLength];
 
-        var goodsFormatted = String.Join(Environment.NewLine, goods);
-
-        for (var i = 0; i < goodsFormatted.Length; i++)
+        var currentIndex = 0;
+        foreach (List<byte> list in listOfLists)
         {
-            if (i != 0 && i % 35 == 0 && goodsFormatted[i-1] != '\n')
-            {
-                goodsFormatted = goodsFormatted.Insert(i, "\n" + AddSpaces(5));
-            }
+            list.CopyTo(result, currentIndex);
+            currentIndex += list.Count;
         }
 
-        var goodsLinesSplit = goodsFormatted.Split("\n");
-
-        var goodsLines = new string[6];
-
-        for (int i = 0; i < goodsLines.Length; i++)
-        {
-            goodsLines[i] = goodsLinesSplit.Length > i ? goodsLinesSplit[i] : "";
-        }
-
-        //Line 1
-        output += formData.DruhKontejneru +
-                  AddSpaces(field10StartingPointFromLeftMargin - formData.DruhKontejneru.Length) +
-                  formData.CisloKontejneru +
-                  AddSpaces(field11StartingPointFromField10 - formData.CisloKontejneru.Length) +
-                  goodsLines[0] +
-                  AddSpaces(field13StartingPointFromField11 - goodsLines[0].Length) +
-                  formData.ImportVaha + EndLine();
-
-        //Line 2
-        var taraText = AppendLineWithPrefixOrEmptyString(tara, formData.TaraKontejneru.ToString());
-        output += AddSpaces(field11StartingPointFromLeftMargin) + goodsLines[1] +
-                  AddSpaces(field13StartingPointFromField11 - goodsLines[1].Length) + taraText;
-
-        //Line 3
-        output += formData.TemperatureInstruction +
-                  AddSpaces(field11StartingPointFromLeftMargin - formData.TemperatureInstruction.Length) +
-                  goodsLines[2] + EndLine();
-
-        //Line 4
-        output += formData.WasteInstruction +
-                  AddSpaces(field11StartingPointFromLeftMargin - formData.WasteInstruction.Length) + goodsLines[3] +
-                  EndLine();
-
-        //Line 5
-        var rejdText = AppendLineWithPrefixOrEmptyString(rejd, formData.OwnerText);
-        rejdText = rejdText.Substring(0, rejdText.Length - 1);
-        output += rejdText + AddSpaces(field11StartingPointFromLeftMargin - rejdText.Length) +
-                  goodsLines[4] + EndLine();
-
-        //Line 6
-        var codeText = AppendLineWithPrefixOrEmptyString(code, formData.UnloadingCode);
-        codeText = codeText.Substring(0, codeText.Length - 1);
-        output += codeText + AddSpaces(field11StartingPointFromLeftMargin - codeText.Length) +
-                  goodsLines[5] + EndLine();
-
-        //Line 7
-        output += AddNewLines(1);
-
-        //Line 8 + 9 (?)
-        var adrInstructionLine = formData.AdrInstruction;
-        var lineLength = 55;
-        if (adrInstructionLine.Length > lineLength)
-        {
-            adrInstructionLine = adrInstructionLine.Insert(lineLength, "\n");
-        }
-
-        if (adrInstructionLine.Length > lineLength * 2)
-        {
-            adrInstructionLine = adrInstructionLine.Substring(0, lineLength * 2 + 1);
-        }
-
-        output += adrInstructionLine + EndLine();
-
-        var maxLines = 10;
-        var actualLines = output.Count(c => c == '\n');
-        output += AddNewLines(maxLines - actualLines);
-
-        return output;
+        return result;
     }
 
     private static string AppendLineWithPrefixOrEmptyString(string prefix, string? text)
@@ -374,55 +431,11 @@ public class Program
         return !string.IsNullOrEmpty(text) ? $"{prefix}: {text}" + EndLine() : "" + EndLine();
     }
 
-    private static string GenerateField14(CmrFormDataDto formData)
-    {
-        var prefix = "";
-        var padding = 6;
-        var output = "";
-
-        if (!string.IsNullOrEmpty(formData.CloText1))
-        {
-            if (formData.CloText1Prefix)
-            {
-                prefix = $"{clo}:  ";
-            }
-
-            output += AppendLineWithPadding(0, prefix + formData.CloText1) +
-                      AppendLineWithPadding(padding, formData.CloText2) +
-                      AppendLineWithPadding(padding, formData.CloText3) +
-                      AppendLineWithPadding(padding, formData.CloText4);
-        }
-
-        if (!string.IsNullOrEmpty(formData.DeclText1))
-        {
-            if (formData.DeclText1Prefix)
-            {
-                prefix = $"{dekl}: ";
-            }
-
-            output += AppendLineWithPadding(0, prefix + formData.DeclText1) +
-                      AppendLineWithPadding(padding, formData.DeclText2) +
-                      AppendLineWithPadding(padding, formData.DeclText3) +
-                      AppendLineWithPadding(padding, formData.DeclText4);
-        }
-
-        var maxLines = 8;
-        var actualLines = output.Count(c => c == '\n');
-        output += AddNewLines(maxLines - actualLines);
-
-        return output;
-    }
-
     private static string AppendLineWithPadding(int padding, string? text)
     {
         return !string.IsNullOrEmpty(text)
             ? AddSpaces(padding) + text + EndLine()
             : "";
-    }
-
-    private static string AddControlCode(byte[] controlCode)
-    {
-        return Ibm852.GetString(controlCode);
     }
 
     private static string AddSpaces(int numberOfSpaces)
@@ -447,22 +460,6 @@ public class Program
         return newLines;
     }
 
-    private static byte[] JoinByteLists(List<List<byte>> listOfLists)
-    {
-        var totalLength = listOfLists.Sum(list => list.Count);
-
-        var result = new byte[totalLength];
-
-        var currentIndex = 0;
-        foreach (List<byte> list in listOfLists)
-        {
-            list.CopyTo(result, currentIndex);
-            currentIndex += list.Count;
-        }
-
-        return result;
-    }
-
     private static string EndLine()
     {
         return "\n";
@@ -477,7 +474,7 @@ public class Program
 
             //1
             CmrNumber = "CTR2024000882",
-            Ridic = "Martin Ma≈•ovƒç√≠k",
+            Ridic = "Martin Maúovü°k",
             RegistracniZnackaTahac = "3SD2546",
             RegistracniZnackaNaves = "3SD2546",
             CisloRidice = "98765424",
@@ -488,27 +485,27 @@ public class Program
             KontaktTelefon2 = "",
 
             //2
-            OdesilatelPrijemce1 = "WESTROCK PACKAGING, VYKL. KOCL√ç≈òOV",
-            OdesilatelPrijemce2 = "SchumiTransport, Kocl√≠≈ôov 258",
+            OdesilatelPrijemce1 = "WESTROCK PACKAGING, VYKL. KOCL÷¸OV",
+            OdesilatelPrijemce2 = "SchumiTransport, Kocl°˝ov 258",
             OdesilatelPrijemce3 = "KOCLIROV,",
             OdesilatelPrijemce4 = "56911 CZ",
 
             //3
-            AdresaNakladky1 = "WESTROCK PACKAGING, VYKL. KOCL√ç≈òOV",
-            AdresaNakladky2 = "SchumiTransport, Kocl√≠≈ôov 258",
+            AdresaNakladky1 = "WESTROCK PACKAGING, VYKL. KOCL÷¸OV",
+            AdresaNakladky2 = "SchumiTransport, Kocl°˝ov 258",
             AdresaNakladky3 = "KOCLIROV, 56911 CZ",
-            AdresaNakladky4 = "pan Pacl√≠k 737 515 907 F:",
+            AdresaNakladky4 = "pan Pacl°k 737 515 907 F:",
 
             //4
             CasPristaveni = new LocalDateTime(2024, 2, 16, 13, 0),
-            MistoPristaveni = "U p≈ô√≠jemce",
+            MistoPristaveni = "U p˝°jemce",
 
             //5
             CisloPlomby = "524819",
 
             //6
             Dopravce1 = "ACKERMAN II. spol. s r.o.",
-            Dopravce2 = "Pap√≠rn√≠kova 612",
+            Dopravce2 = "Pap°rn°kova 612",
             Dopravce3 = "Praha 4",
             Dopravce4 = "142 00 CZ",
 
@@ -567,12 +564,12 @@ public class Program
             TaraKontejneru = 4000,
             ImportVaha = 16625,
             AdrInstruction =
-                "\"ADR - popis viz. Dopl≈àkov√Ω list ADR, ADR - siehe in der Erg√§nzungsliste ADR\"",
+                "\"ADR - popis viz. DoplÂkovÏ list ADR, ADR - siehe in der ErgÑnzungsliste ADR\"",
 
             //14
             CloText1Prefix = true,
             CloText1 = "CZ590201 - PARDUBICE",
-            CloText2 = "Palack√©ho 2659",
+            CloText2 = "PalackÇho 2659",
             CloText3 = "asdsad",
             CloText4 = "",
 
@@ -584,18 +581,18 @@ public class Program
 
             //16
             VystaveneDne = new LocalDate(2024, 1, 17),
-            VystaveneV = "ƒåesk√° T≈ôebov√°",
+            VystaveneV = "¨esk† T˝ebov†",
 
             //20
-            WeightingInstruction = "JET PO NAKL√ÅDCE NA V√ÅHU!/LITRY",
+            WeightingInstruction = "JET PO NAKLµDCE NA VµHU!/LITRY",
             PickUpInstruction =
                 "Vyzvednout: Embrace the journey, conquer challenges, and cherish the moments. Life is a canvas; paint it with passion. Shine brightly, the world awaits your brilliance.",
             ReturnToInstruction =
-                "Vr√°tit: Embrace the journey, conquer challenges, and cherish the moments. Life is a canvas; paint it with passion. Shine brightly, the world awaits your brilliance.",
+                "Vr†tit: Embrace the journey, conquer challenges, and cherish the moments. Life is a canvas; paint it with passion. Shine brightly, the world awaits your brilliance.",
             Services =
-                "Slu≈æby: Embrace the journey, conquer challenges, and cherish the moments. Life is a canvas; paint it with passion. Shine brightly, the world awaits your brilliance.",
+                "Slußby: Embrace the journey, conquer challenges, and cherish the moments. Life is a canvas; paint it with passion. Shine brightly, the world awaits your brilliance.",
             Notes =
-                "Pozn√°mky: Embrace the journey, conquer challenges, and cherish the moments. Life is a canvas; paint it with passion. Shine brightly, the world awaits your brilliance."
+                "Pozn†mky: Embrace the journey, conquer challenges, and cherish the moments. Life is a canvas; paint it with passion. Shine brightly, the world awaits your brilliance."
         };
     }
 }
