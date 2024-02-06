@@ -11,7 +11,7 @@ public class Program
     private static readonly Encoding? Encoding = CodePagesEncodingProvider.Instance.GetEncoding(852);
     static void Main()
     {
-        var s = CmrTextFileGenerator.GenerateCmrTextAsStream(GenerateCmrFormDataDto(), CultureInfo.CurrentCulture, 5);
+        var s = CmrTextFileGenerator.GenerateCmrTextAsStream(GenerateCmrFormDataDto(), CultureInfo.CurrentCulture, 6);
         PrintClient.PrintStream(s, Encoding);
         
         // FileCreator.SaveToFile(s, Encoding);
