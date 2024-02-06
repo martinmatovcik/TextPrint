@@ -61,8 +61,9 @@ public class CmrTextFileGenerator
 
     //CAREFULL!!!!!
     private const int StartVariableRevLineFeedValue = 35;
+    private const int EndVariableRevLineFeedValue = 25;
     private static readonly byte[] StartVariableRevLineFeedCommand = { 27, 106, StartVariableRevLineFeedValue };
-    private static readonly byte[] VariableLineFeedToZeroCommand = { 27, 74, StartVariableRevLineFeedValue };
+    private static readonly byte[] VariableLineFeedToZeroCommand = { 27, 74, EndVariableRevLineFeedValue };
 
     private const char EndOfLine = '\n';
     private const char Space = ' ';
@@ -127,7 +128,8 @@ public class CmrTextFileGenerator
             { 
                 new(FormFeed),
                 new(VariableLineFeedToZeroCommand),
-                new(variableLineFeedEndFile) });
+                new(variableLineFeedEndFile) 
+            });
 
         var cmrText =
             //Start
