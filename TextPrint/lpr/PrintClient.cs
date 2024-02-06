@@ -5,11 +5,10 @@ namespace TextPrint.lpr;
 
 public class PrintClient
 {
-    public static void PrintFile(Stream cmr)
+    public static void PrintStream(Stream stream, Encoding encoding)
     {
         string ipAddress = "192.168.50.159";
         int port = 9100;
-        var encoding = CodePagesEncodingProvider.Instance.GetEncoding(852);
         
         try
         {
@@ -18,7 +17,7 @@ public class PrintClient
             client.Connect(ipAddress, port);
 
             // Write ZPL String to connection
-            StreamReader reader = new StreamReader(cmr, encoding);
+            StreamReader reader = new StreamReader(stream, encoding);
             StreamWriter writer = new StreamWriter(client.GetStream(), encoding);
             string cmrText = reader.ReadToEnd();
             reader.Close();

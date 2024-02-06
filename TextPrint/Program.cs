@@ -2,6 +2,7 @@
 using System.Text;
 using NodaTime;
 using TextPrint.cmr;
+using TextPrint.lpr;
 
 namespace TextPrint;
 
@@ -11,16 +12,9 @@ public class Program
     static void Main()
     {
         var s = CmrTextFileGenerator.GenerateCmrTextAsStream(GenerateCmrFormDataDto(), CultureInfo.CurrentCulture, 4);
-        SaveToFile(s);
-    }
-
-    private static void SaveToFile(Stream stream)
-    {
-        var filePath = "/Users/macbook/RiderProjects/TextPrint/TextPrint/files/cmr-test.txt";
-        StreamReader reader = new StreamReader(stream, Encoding);
-        string cmrText =  reader.ReadToEnd();
-        reader.Close();
-        File.WriteAllText(filePath, cmrText, Encoding);
+        PrintClient.PrintStream(s, Encoding);
+        
+        // FileCreator.SaveToFile(s, Encoding);
     }
 
     private static CmrFormDataDto GenerateCmrFormDataDto()
