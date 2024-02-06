@@ -10,9 +10,11 @@ public class CmrTextFileGenerator
     private static readonly Encoding? Encoding = CodePagesEncodingProvider.Instance.GetEncoding(852);
 
     //Document margin and padding
+    private const int leftMarginSTX = 2;
+    
     private const int OutsideFormLeftMargin = 3;
     private const int InsideFormLeftPadding = 1;
-    private const int PrinterLeftMargin = OutsideFormLeftMargin + InsideFormLeftPadding;
+    private const int PrinterLeftMargin = OutsideFormLeftMargin + InsideFormLeftPadding + leftMarginSTX;
     private const int TopMarginInLines = 2;
 
     //CMR fields widths and starting points
