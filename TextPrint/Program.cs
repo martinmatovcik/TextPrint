@@ -1,471 +1,26 @@
 ﻿using System.Globalization;
-using System.Runtime.CompilerServices;
-using System.Security.AccessControl;
 using System.Text;
 using NodaTime;
-using TextPrint;
 using TextPrint.cmr;
-using TextPrint.lpr;
+
+namespace TextPrint;
 
 public class Program
 {
+    private static readonly Encoding? Encoding = CodePagesEncodingProvider.Instance.GetEncoding(852);
     static void Main()
     {
-        // CmrTextFileGenerator.GenereateCmrTextFile(GenerateCmrFormDataDto(), CultureInfo.CurrentCulture);
-        // Print.GenereateCmrTextFile();
-        
-        for (int i = 0; i < 3; i++)
-        {
-            // PrintClient.PrintFile("/Users/macbook/RiderProjects/TextPrint/TextPrint/files/cmr-test.txt");
-            PrintClient.PrintFile("/Users/macbook/RiderProjects/TextPrint/TextPrint/files/test.txt");
-        }
+        var s = CmrTextFileGenerator.GenerateCmrTextAsStream(GenerateCmrFormDataDto(), CultureInfo.CurrentCulture, 4);
+        SaveToFile(s);
     }
 
-    private static Encoding? Ibm852 { get; set; } = CodePagesEncodingProvider.Instance.GetEncoding(852);
-    private static CultureInfo? CultureInfo { get; set; }
-
-    //todo --- rm.GetString.... 
-    private static string code = "Code";
-    private static string rejd = "Rejd";
-    private static string tara = "TARA";
-    private static string clo = "CLO";
-    private static string dekl = "DEKL";
-
-    public static void GenereateCmrTextFile(CmrFormDataDto formData, CultureInfo cultureInfo)
+    private static void SaveToFile(Stream stream)
     {
-        CultureInfo = cultureInfo;
-        string filePath = "/Users/macbook/RiderProjects/TextPrint/TextPrint/files/cmr-test.txt";
-
-        try
-        {
-            if (File.Exists(filePath))
-            {
-                File.Delete(filePath);
-                Console.WriteLine("File deleted successfully!");
-            }
-
-            //Italics ON - 27,52 -> OFF - 27,53
-            //Double width ON - 27,87,49 -> OFF - 27,87,48
-            //Double height ON - 27,119,49 -> OFF - 27,119,48
-            //IBM 852 characterSet -> 27,82,46
-            //Set left margin -> 27,108,n1 --- (n1 specifics in manual page 121)
-            //Set right margin -> 27,81,n2 --- (n2 specifics in manual page 121)
-
-            int outsideFormLeftMargin = 6;
-            int insideFormLeftMargin = 1;
-            int leftMargin = outsideFormLeftMargin + insideFormLeftMargin;
-            int upperFieldWidth = 36;
-            int upperFieldWidthUsable = upperFieldWidth - insideFormLeftMargin;
-
-            int field1LeftStartingPoint = 10; //ideal is 17
-
-            int upperRightFieldStartingPoint = upperFieldWidthUsable;
-            int field1RightDriverStartingPoint = upperRightFieldStartingPoint + 10; //ideal is 51
-            int field1RightStartingPoint = upperRightFieldStartingPoint + 6;
-            int field5StartingPointFromLeftMargin = 21;
-            int field6StartingPoint = upperRightFieldStartingPoint + insideFormLeftMargin;
-            int field8StartingPointFromField5 = 26;
-
-            int field16_1StartingPointFromLeftMargin = 7;
-            int field16_2StartingPointFromField16_1 = 38;
-
-            int upperSpacesBetween = field1RightStartingPoint - field1LeftStartingPoint;
-
-            var italicsOn = new byte[] { 27, 52 };
-            var italicsOff = new byte[] { 27, 53 };
-            var doubleWidthOn = new byte[] { 27, 87, 49 };
-            var doubleWidthOff = new byte[] { 27, 87, 48 };
-            var doubleHeightOn = new byte[] { 27, 119, 49 };
-            var doubleHeightOff = new byte[] { 27, 119, 48 };
-            var ibm852CharacterSet = new byte[] { 27, 82, 46 };
-            var setLeftMargin = new byte[] { 27, 108, (byte)leftMargin };
-            var formFeed = new byte[] { 12 };
-            var lineFeed = new byte[] { 10 };
-            var carriageReturn = new byte[] { 13 };
-            var variableLineFeed28 = new byte[] { 27, 74, 28 };
-            var variableLineFeedEndFile = new byte[] { 27, 74, 36 };
-
-            var initialFileCommands = JoinByteLists(new List<List<byte>>()
-            {
-                new(ibm852CharacterSet), new(italicsOff), new(doubleWidthOff), new(doubleHeightOff), new(setLeftMargin)
-            });
-
-            var cmrNumberFormattingOnCommand = JoinByteLists(new List<List<byte>>()
-            {
-                new(doubleWidthOn), new(doubleHeightOn),
-            });
-
-            var cmrNumberFormattingOffCommand = JoinByteLists(new List<List<byte>>()
-            {
-                new(doubleWidthOff), new(doubleHeightOff),
-            });
-
-            var endFileCommands = JoinByteLists(new List<List<byte>>()
-            {
-                new(formFeed), new(variableLineFeedEndFile)
-            });
-
-            var content =
-                //Start
-                AddControlCode(initialFileCommands) +
-                // todo -- if continuous print -> 6, if first print -> 5
-                AddNewLines(5) +
-
-                //1
-                AddSpaces(field1RightDriverStartingPoint) + formData.Ridic + EndLine() +
-                AddSpaces(field1LeftStartingPoint) + formData.ObjednavkaCislo + EndLine() +
-                AddSpaces(field1LeftStartingPoint) + formData.ReleaseCislo +
-                AddSpaces(upperSpacesBetween - formData.ReleaseCislo.Length) +
-                $"({formData.CisloRidice}) {formData.RegistracniZnackaTahac}/{formData.RegistracniZnackaNaves}" +
-                EndLine() +
-                AddSpaces(field1LeftStartingPoint) + formData.KontaktOsoba + EndLine() +
-                AddSpaces(field1RightStartingPoint) +
-                AddControlCode(cmrNumberFormattingOnCommand) + formData.CmrNumber +
-                AddControlCode(cmrNumberFormattingOffCommand) + EndLine() +
-                AddSpaces(field1LeftStartingPoint) + formData.KontaktTelefon1 + EndLine() +
-                AddSpaces(field1LeftStartingPoint) + formData.KontaktTelefon2 + EndLine() +
-
-                //2 + 6
-                AddNewLines(2) +
-                formData.OdesilatelPrijemce1 + AddSpaces(upperFieldWidth - formData.OdesilatelPrijemce1.Length) +
-                formData.Dopravce1 + EndLine() +
-                formData.OdesilatelPrijemce2 + AddSpaces(upperFieldWidth - formData.OdesilatelPrijemce2.Length) +
-                formData.Dopravce2 + EndLine() +
-                formData.OdesilatelPrijemce3 + AddSpaces(upperFieldWidth - formData.OdesilatelPrijemce3.Length) +
-                formData.Dopravce3 + EndLine() +
-                formData.OdesilatelPrijemce4 + AddSpaces(upperFieldWidth - formData.OdesilatelPrijemce4.Length) +
-                formData.Dopravce4 + EndLine() +
-
-                //3
-                AddNewLines(3) +
-                formData.AdresaNakladky1 + EndLine() +
-                formData.AdresaNakladky2 + EndLine() +
-                formData.AdresaNakladky3 + EndLine() +
-                formData.AdresaNakladky4 + EndLine() +
-
-                //4
-                AddControlCode(variableLineFeed28) +
-                AddNewLines(2) +
-                $"{formData.CasPristaveni} / {formData.MistoPristaveni}" + EndLine() +
-
-                //5,8
-                AddNewLines(1) +
-                AddSpaces(field5StartingPointFromLeftMargin) + formData.CisloPlomby +
-                AddSpaces(field8StartingPointFromField5 - formData.CisloPlomby.Length) + formData.PripojeneDoklady +
-                EndLine() +
-
-                //9,10,11,12,13
-                AddNewLines(1) +
-                GenerateFields9To13(formData) +
-
-                //14 
-                GenerateField14(formData) +
-
-                //16
-                AddSpaces(field16_1StartingPointFromLeftMargin) + formData.VystaveneV +
-                AddSpaces(field16_2StartingPointFromField16_1 - formData.VystaveneV.Length) +
-                formData.VystaveneDne.ToString("dd.MM.yyyy", cultureInfo) + EndLine() +
-
-                //20
-                AddNewLines(7) +
-                GenerateField20(formData) +
-
-                //End
-                AddControlCode(endFileCommands);
-
-            File.WriteAllText(filePath, content, Ibm852);
-            Console.WriteLine("File wrote successfully.");
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"An error occurred: {ex.Message}");
-        }
-    }
-
-    private static string GenerateField20(CmrFormDataDto formData)
-    {
-        var lineLength = 66;
-        var paragraphLineLength = lineLength / 2;
-
-        var pickUpInstructionLine1 = formData.PickUpInstruction;
-        var pickUpInstructionLine2 = "";
-        var pickUpInstructionLine3 = "";
-        var pickupInstructionLength = formData.PickUpInstruction.Length;
-
-        if (pickupInstructionLength > paragraphLineLength)
-        {
-            pickUpInstructionLine2 =
-                pickUpInstructionLine1.Substring(paragraphLineLength, pickupInstructionLength - paragraphLineLength);
-            pickUpInstructionLine1 = pickUpInstructionLine1.Substring(0, paragraphLineLength);
-        }
-
-        if (pickupInstructionLength > paragraphLineLength * 2)
-        {
-            pickUpInstructionLine3 = pickUpInstructionLine2.Substring(paragraphLineLength, paragraphLineLength);
-            pickUpInstructionLine2 = pickUpInstructionLine2.Substring(0, paragraphLineLength);
-        }
-
-        var returnToInstructionLine1 = formData.ReturnToInstruction;
-        var returnToInstructionLine2 = "";
-        var returnToInstructionLine3 = "";
-        var returnToInstructionLength = formData.ReturnToInstruction.Length;
-
-        if (returnToInstructionLength > paragraphLineLength)
-        {
-            returnToInstructionLine2 =
-                returnToInstructionLine1.Substring(paragraphLineLength,
-                    returnToInstructionLength - paragraphLineLength);
-            returnToInstructionLine1 = returnToInstructionLine1.Substring(0, paragraphLineLength);
-        }
-
-        if (returnToInstructionLength > paragraphLineLength * 2)
-        {
-            returnToInstructionLine3 = returnToInstructionLine2.Substring(paragraphLineLength, paragraphLineLength);
-            returnToInstructionLine2 = returnToInstructionLine2.Substring(0, paragraphLineLength);
-        }
-
-        //Weight Instruction
-        var spacesBetween = 4;
-        var output = AppendLineWithPadding(7, formData.WeightingInstruction) +
-                     //Pickup / Return Instruction
-                     pickUpInstructionLine1 +
-                     AddSpaces(paragraphLineLength - pickUpInstructionLine1.Length + spacesBetween) +
-                     returnToInstructionLine1 + EndLine() +
-                     pickUpInstructionLine2 +
-                     AddSpaces(paragraphLineLength - pickUpInstructionLine2.Length + spacesBetween) +
-                     returnToInstructionLine2 + EndLine() +
-                     pickUpInstructionLine3 +
-                     AddSpaces(paragraphLineLength - pickUpInstructionLine3.Length + spacesBetween) +
-                     returnToInstructionLine3 + EndLine() + AddNewLines(1);
-
-        lineLength += spacesBetween;
-        //Services
-        var servicesLine = formData.Services;
-        if (servicesLine.Length > lineLength)
-        {
-            servicesLine = servicesLine.Insert(lineLength, "\n");
-        }
-
-        if (servicesLine.Length > lineLength * 2)
-        {
-            servicesLine = servicesLine.Substring(0, lineLength * 2 + 1);
-        }
-
-        output += servicesLine + EndLine();
-
-        //Notes
-        var notesLine = formData.Notes;
-        var notesLineLength = notesLine.Length;
-        if (notesLine.Length > lineLength)
-        {
-            notesLine = notesLine.Insert(lineLength, "\n");
-        }
-
-        if (notesLine.Length > lineLength * 2)
-        {
-            notesLine = notesLine.Insert(lineLength * 2, "\n");
-        }
-
-        if (notesLine.Length > lineLength * 3)
-        {
-            notesLine = notesLine.Substring(0, lineLength * 3 + 2);
-        }
-
-        output += notesLine + EndLine();
-        return output;
-    }
-
-    private static string GenerateFields9To13(CmrFormDataDto formData)
-    {
-        var output = "";
-
-        int field10StartingPointFromLeftMargin = 9;
-        int field11StartingPointFromField10 = 15;
-        int field11StartingPointFromLeftMargin = field10StartingPointFromLeftMargin + field11StartingPointFromField10;
-        int field13StartingPointFromField11 = 36;
-
-        var goods = formData.Zbozi
-            .DistinctBy(x => x.DruhObalu + x.Oznaceni)
-            .GroupBy(x => x.DruhObalu)
-            .Select(druhy => (druhy.Key + ' ').PadRight(5, ' ') + String.Join(", ", druhy.Select(zb => zb.Oznaceni)));
-
-        var goodsFormatted = String.Join(Environment.NewLine, goods);
-
-        for (var i = 0; i < goodsFormatted.Length; i++)
-        {
-            if (i != 0 && i % 35 == 0 && goodsFormatted[i-1] != '\n')
-            {
-                goodsFormatted = goodsFormatted.Insert(i, "\n" + AddSpaces(5));
-            }
-        }
-
-        var goodsLinesSplit = goodsFormatted.Split("\n");
-
-        var goodsLines = new string[6];
-
-        for (int i = 0; i < goodsLines.Length; i++)
-        {
-            goodsLines[i] = goodsLinesSplit.Length > i ? goodsLinesSplit[i] : "";
-        }
-
-        //Line 1
-        output += formData.DruhKontejneru +
-                  AddSpaces(field10StartingPointFromLeftMargin - formData.DruhKontejneru.Length) +
-                  formData.CisloKontejneru +
-                  AddSpaces(field11StartingPointFromField10 - formData.CisloKontejneru.Length) +
-                  goodsLines[0] +
-                  AddSpaces(field13StartingPointFromField11 - goodsLines[0].Length) +
-                  formData.ImportVaha + EndLine();
-
-        //Line 2
-        var taraText = AppendLineWithPrefixOrEmptyString(tara, formData.TaraKontejneru.ToString());
-        output += AddSpaces(field11StartingPointFromLeftMargin) + goodsLines[1] +
-                  AddSpaces(field13StartingPointFromField11 - goodsLines[1].Length) + taraText;
-
-        //Line 3
-        output += formData.TemperatureInstruction +
-                  AddSpaces(field11StartingPointFromLeftMargin - formData.TemperatureInstruction.Length) +
-                  goodsLines[2] + EndLine();
-
-        //Line 4
-        output += formData.WasteInstruction +
-                  AddSpaces(field11StartingPointFromLeftMargin - formData.WasteInstruction.Length) + goodsLines[3] +
-                  EndLine();
-
-        //Line 5
-        var rejdText = AppendLineWithPrefixOrEmptyString(rejd, formData.OwnerText);
-        rejdText = rejdText.Substring(0, rejdText.Length - 1);
-        output += rejdText + AddSpaces(field11StartingPointFromLeftMargin - rejdText.Length) +
-                  goodsLines[4] + EndLine();
-
-        //Line 6
-        var codeText = AppendLineWithPrefixOrEmptyString(code, formData.UnloadingCode);
-        codeText = codeText.Substring(0, codeText.Length - 1);
-        output += codeText + AddSpaces(field11StartingPointFromLeftMargin - codeText.Length) +
-                  goodsLines[5] + EndLine();
-
-        //Line 7
-        output += AddNewLines(1);
-
-        //Line 8 + 9 (?)
-        var adrInstructionLine = formData.AdrInstruction;
-        var lineLength = 55;
-        if (adrInstructionLine.Length > lineLength)
-        {
-            adrInstructionLine = adrInstructionLine.Insert(lineLength, "\n");
-        }
-
-        if (adrInstructionLine.Length > lineLength * 2)
-        {
-            adrInstructionLine = adrInstructionLine.Substring(0, lineLength * 2 + 1);
-        }
-
-        output += adrInstructionLine + EndLine();
-
-        var maxLines = 10;
-        var actualLines = output.Count(c => c == '\n');
-        output += AddNewLines(maxLines - actualLines);
-
-        return output;
-    }
-
-    private static string AppendLineWithPrefixOrEmptyString(string prefix, string? text)
-    {
-        return !string.IsNullOrEmpty(text) ? $"{prefix}: {text}" + EndLine() : "" + EndLine();
-    }
-
-    private static string GenerateField14(CmrFormDataDto formData)
-    {
-        var prefix = "";
-        var padding = 6;
-        var output = "";
-
-        if (!string.IsNullOrEmpty(formData.CloText1))
-        {
-            if (formData.CloText1Prefix)
-            {
-                prefix = $"{clo}:  ";
-            }
-
-            output += AppendLineWithPadding(0, prefix + formData.CloText1) +
-                      AppendLineWithPadding(padding, formData.CloText2) +
-                      AppendLineWithPadding(padding, formData.CloText3) +
-                      AppendLineWithPadding(padding, formData.CloText4);
-        }
-
-        if (!string.IsNullOrEmpty(formData.DeclText1))
-        {
-            if (formData.DeclText1Prefix)
-            {
-                prefix = $"{dekl}: ";
-            }
-
-            output += AppendLineWithPadding(0, prefix + formData.DeclText1) +
-                      AppendLineWithPadding(padding, formData.DeclText2) +
-                      AppendLineWithPadding(padding, formData.DeclText3) +
-                      AppendLineWithPadding(padding, formData.DeclText4);
-        }
-
-        var maxLines = 8;
-        var actualLines = output.Count(c => c == '\n');
-        output += AddNewLines(maxLines - actualLines);
-
-        return output;
-    }
-
-    private static string AppendLineWithPadding(int padding, string? text)
-    {
-        return !string.IsNullOrEmpty(text)
-            ? AddSpaces(padding) + text + EndLine()
-            : "";
-    }
-
-    private static string AddControlCode(byte[] controlCode)
-    {
-        return Ibm852.GetString(controlCode);
-    }
-
-    private static string AddSpaces(int numberOfSpaces)
-    {
-        var spaces = "";
-        for (var i = 0; i < numberOfSpaces; i++)
-        {
-            spaces += " ";
-        }
-
-        return spaces;
-    }
-
-    private static string AddNewLines(int numberOfNewLines)
-    {
-        var newLines = "";
-        for (var i = 0; i < numberOfNewLines; i++)
-        {
-            newLines += "\n";
-        }
-
-        return newLines;
-    }
-
-    private static byte[] JoinByteLists(List<List<byte>> listOfLists)
-    {
-        var totalLength = listOfLists.Sum(list => list.Count);
-
-        var result = new byte[totalLength];
-
-        var currentIndex = 0;
-        foreach (List<byte> list in listOfLists)
-        {
-            list.CopyTo(result, currentIndex);
-            currentIndex += list.Count;
-        }
-
-        return result;
-    }
-
-    private static string EndLine()
-    {
-        return "\n";
+        var filePath = "/Users/macbook/RiderProjects/TextPrint/TextPrint/files/cmr-test.txt";
+        StreamReader reader = new StreamReader(stream, Encoding);
+        string cmrText =  reader.ReadToEnd();
+        reader.Close();
+        File.WriteAllText(filePath, cmrText, Encoding);
     }
 
     private static CmrFormDataDto GenerateCmrFormDataDto()
@@ -504,7 +59,7 @@ public class Program
             MistoPristaveni = "U příjemce",
 
             //5
-            CisloPlomby = "524819",
+            CisloPlomby = "",
 
             //6
             Dopravce1 = "ACKERMAN II. spol. s r.o.",
@@ -513,12 +68,12 @@ public class Program
             Dopravce4 = "142 00 CZ",
 
             //8
-            PripojeneDoklady = "DL2316305",
+            PripojeneDoklady = "",
 
             //9,10,11,12
-            WasteInstruction = "Odpady....",
+            WasteInstruction = "",
 
-            TemperatureInstruction = "Teplota xz",
+            TemperatureInstruction = "",
 
             OwnerText = "CNG",
             DruhKontejneru = "40hc",
@@ -561,7 +116,7 @@ public class Program
                     Oznaceni = "48103210"
                 },
             },
-            UnloadingCode = "Unloading code",
+            UnloadingCode = "",
 
             //13
             TaraKontejneru = 4000,
@@ -577,8 +132,8 @@ public class Program
             CloText4 = "",
 
             DeclText1Prefix = true,
-            DeclText1 = "schvaleny prijemce",
-            DeclText2 = "CLENI NA VYKLADCE",
+            DeclText1 = "",
+            DeclText2 = "",
             DeclText3 = "",
             DeclText4 = "",
 
@@ -589,13 +144,13 @@ public class Program
             //20
             WeightingInstruction = "JET PO NAKLÁDCE NA VÁHU!/LITRY",
             PickUpInstruction =
-                "Vyzvednout: Embrace the journey, conquer challenges, and cherish the moments. Life is a canvas; paint it with passion. Shine brightly, the world awaits your brilliance.",
+                "Vyzvednout: Embrace the journey",
             ReturnToInstruction =
-                "Vrátit: Embrace the journey, conquer challenges, and cherish the moments. Life is a canvas; paint it with passion. Shine brightly, the world awaits your brilliance.",
+                "Vrátit: Embrace the journey, conquer challenges, and cherish",
             Services =
                 "Služby: Embrace the journey, conquer challenges, and cherish the moments. Life is a canvas; paint it with passion. Shine brightly, the world awaits your brilliance.",
             Notes =
-                "Poznámky: Embrace the journey, conquer challenges, and cherish the moments. Life is a canvas; paint it with passion. Shine brightly, the world awaits your brilliance."
+                "Poznámky: Embrace the journey, conquer challenges, and cherish the moments. Life is a canvas; paint it with pass"
         };
     }
 }

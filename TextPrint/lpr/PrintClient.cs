@@ -5,7 +5,7 @@ namespace TextPrint.lpr;
 
 public class PrintClient
 {
-    public static void PrintFile(string filePath)
+    public static void PrintFile(Stream cmr)
     {
         string ipAddress = "192.168.50.159";
         int port = 9100;
@@ -18,11 +18,11 @@ public class PrintClient
             client.Connect(ipAddress, port);
 
             // Write ZPL String to connection
-            StreamReader reader = new StreamReader(filePath, encoding);
+            StreamReader reader = new StreamReader(cmr, encoding);
             StreamWriter writer = new StreamWriter(client.GetStream(), encoding);
-            string file = reader.ReadToEnd();
+            string cmrText = reader.ReadToEnd();
             reader.Close();
-            writer.Write(file);
+            writer.Write(cmrText);
             writer.Flush();
             writer.Close();
             client.Close();
