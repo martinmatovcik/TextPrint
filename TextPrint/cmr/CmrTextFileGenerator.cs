@@ -11,7 +11,7 @@ public class CmrTextFileGenerator
 
     //Document margin and padding
     private const int leftMarginSTX = 2;
-    
+
     private const int OutsideFormLeftMargin = 3;
     private const int InsideFormLeftPadding = 1;
     private const int PrinterLeftMargin = OutsideFormLeftMargin + InsideFormLeftPadding + leftMarginSTX;
@@ -63,7 +63,7 @@ public class CmrTextFileGenerator
     private const int StartVariableRevLineFeedValue = 35;
     private const int EndVariableRevLineFeedValue = 25;
     private static readonly byte[] StartVariableRevLineFeedCommand = { 27, 106, StartVariableRevLineFeedValue };
-    private static readonly byte[] VariableLineFeedToZeroCommand = { 27, 74, EndVariableRevLineFeedValue };
+    private static readonly byte[] VariableLineFeedToZeroCommand = { 27, 106, 36 - StartVariableRevLineFeedValue };
 
     private const char EndOfLine = '\n';
     private const char Space = ' ';
@@ -125,11 +125,11 @@ public class CmrTextFileGenerator
         });
 
         var endFilePrinterCommands = JoinByteLists(new List<List<byte>>()
-            { 
-                new(FormFeed),
-                new(VariableLineFeedToZeroCommand),
-                new(variableLineFeedEndFile) 
-            });
+        {
+            new(FormFeed),
+            new(VariableLineFeedToZeroCommand),
+            new(variableLineFeedEndFile)
+        });
 
         var cmrText =
             //Start
