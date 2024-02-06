@@ -126,7 +126,7 @@ public class CmrTextFileGenerator
         var endFilePrinterCommands = JoinByteLists(new List<List<byte>>()
             { 
                 new(FormFeed),
-                // new(VariableLineFeedToZeroCommand),
+                new(VariableLineFeedToZeroCommand),
                 new(variableLineFeedEndFile) });
 
         var cmrText =
