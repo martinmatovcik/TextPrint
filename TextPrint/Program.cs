@@ -11,7 +11,7 @@ public class Program
     private static readonly Encoding? Encoding = CodePagesEncodingProvider.Instance.GetEncoding(852);
     static void Main()
     {
-        var s = CmrTextFileGenerator.GenerateCmrTextAsStream(GenerateCmrFormDataDto(), CultureInfo.CurrentCulture, 6);
+        var s = CmrTextFileGenerator.GenerateCmrTextAsStream(GenerateCmrFormDataDto(), CultureInfo.CurrentCulture, 0);
         PrintClient.PrintStream(s, Encoding);
         
         // FileCreator.SaveToFile(s, Encoding);
@@ -126,8 +126,8 @@ public class Program
             CloText4 = "",
 
             DeclText1Prefix = true,
-            DeclText1 = "",
-            DeclText2 = "",
+            DeclText1 = "schvaleny prijemce",
+            DeclText2 = "CLENI NA VYKLADCE",
             DeclText3 = "",
             DeclText4 = "",
 
