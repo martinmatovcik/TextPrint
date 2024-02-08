@@ -64,7 +64,7 @@ public class CmrTextFileGenerator
     private const int EndVariableRevLineFeedValue = 25;
     private static readonly byte[] StartVariableRevLineFeedCommand = { 27, 106, StartVariableRevLineFeedValue };
     // private static readonly byte[] VariableLineFeedToZeroCommand = { 27, 74, 35 };
-    private static readonly byte[] VariableLineFeedToZeroCommand = { 27, 106, 6 };
+    private static readonly byte[] VariableLineFeedToZeroCommand = { 27, 106, 7 };
 
     private const char EndOfLine = '\n';
     private const char Space = ' ';
