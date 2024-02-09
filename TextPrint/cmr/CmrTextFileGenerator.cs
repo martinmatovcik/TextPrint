@@ -127,7 +127,7 @@ public class CmrTextFileGenerator
 
         var endFilePrinterCommands = JoinByteLists(new List<List<byte>>()
         {
-            new(FormFeed),
+            // new(FormFeed),
             // new(VariableLineFeedToZeroCommand),
             new(variableLineFeedEndFile)
         });
@@ -215,7 +215,7 @@ public class CmrTextFileGenerator
             GenerateField20(formData) +
 
             //End
-            AddControlCode(endFilePrinterCommands) + AddControlCode(VariableLineFeedToZeroCommand);
+            AddControlCode(endFilePrinterCommands) + AddControlCode(VariableLineFeedToZeroCommand) + AddControlCode(FormFeed);
 
         return new MemoryStream(Encoding.GetBytes(cmrText));
     }
