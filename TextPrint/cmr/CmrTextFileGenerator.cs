@@ -65,9 +65,6 @@ public class CmrTextFileGenerator
     private static readonly byte[] StartVariableRevLineFeedCommand = { 27, 106, StartVariableRevLineFeedValue };
     // private static readonly byte[] VariableLineFeedToZeroCommand = { 27, 74, 35 };
     private static readonly byte[] VariableLineFeedToZeroCommand = { 27, 106, 7 };
-    
-    private static readonly byte[] BigReverseFull = { 27, 106, 255 };
-    private static readonly byte[] BigReverseAdd = { 27, 106, 102 };
 
     private const char EndOfLine = '\n';
     private const char Space = ' ';
@@ -137,9 +134,6 @@ public class CmrTextFileGenerator
 
         var cmrText =
             //Start
-            AddControlCode(BigReverseFull) +
-            AddControlCode(BigReverseFull) +
-            AddControlCode(BigReverseAdd) +
             AddControlCode(initialFilePrinterCommands) +
             AddNewLines(TopMarginInLines + verticalOffSetLines) +
             AddControlCode(StartVariableRevLineFeedCommand) +
