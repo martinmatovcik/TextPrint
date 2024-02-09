@@ -9,6 +9,7 @@ namespace TextPrint;
 public class Program
 {
     private static readonly Encoding? Encoding = CodePagesEncodingProvider.Instance.GetEncoding(852);
+
     static void Main()
     {
         var s = CmrTextFileGenerator.GenerateCmrTextAsStream(GenerateCmrFormDataDto(), CultureInfo.CurrentCulture, 0);
@@ -69,46 +70,11 @@ public class Program
 
             TemperatureInstruction = "",
 
-            OwnerText = "CNG",
-            DruhKontejneru = "40hc",
-            CisloKontejneru = "WFHU 518088-2",
+            OwnerText = "",
+            DruhKontejneru = "",
+            CisloKontejneru = "",
             Zbozi = new List<ZboziData>
             {
-                new()
-                {
-                    DruhObalu = "ROL",
-                    Oznaceni = "48103210"
-                },
-                new()
-                {
-                    DruhObalu = "ROL",
-                    Oznaceni = "48103211"
-                },
-                new()
-                {
-                    DruhObalu = "ROL",
-                    Oznaceni = "48103212"
-                },
-                new()
-                {
-                    DruhObalu = "ROL",
-                    Oznaceni = "48103213"
-                },
-                new()
-                {
-                    DruhObalu = "ROL",
-                    Oznaceni = "48103214"
-                },
-                new()
-                {
-                    DruhObalu = "ROL",
-                    Oznaceni = "48103215"
-                },
-                new()
-                {
-                    DruhObalu = "PAL",
-                    Oznaceni = "48103210"
-                },
             },
             UnloadingCode = "",
 
@@ -116,35 +82,35 @@ public class Program
             TaraKontejneru = 4000,
             ImportVaha = 16625,
             AdrInstruction =
-                "\"ADR - popis viz. Doplňkový list ADR, ADR - siehe in der Ergänzungsliste ADR\"",
+                "",
 
             //14
-            CloText1Prefix = true,
-            CloText1 = "CZ590201 - PARDUBICE",
-            CloText2 = "Palackého 2659",
-            CloText3 = "asdsad",
+            CloText1Prefix = false,
+            CloText1 = "",
+            CloText2 = "",
+            CloText3 = "",
             CloText4 = "",
 
-            DeclText1Prefix = true,
-            DeclText1 = "schvaleny prijemce",
-            DeclText2 = "CLENI NA VYKLADCE",
+            DeclText1Prefix = false,
+            DeclText1 = "",
+            DeclText2 = "",
             DeclText3 = "",
             DeclText4 = "",
 
             //16
             VystaveneDne = new LocalDate(2024, 1, 17),
-            VystaveneV = "Česká Třebová",
+            VystaveneV = "",
 
             //20
-            WeightingInstruction = "JET PO NAKLÁDCE NA VÁHU!/LITRY",
+            WeightingInstruction = "",
             PickUpInstruction =
-                "Vyzvednout: Embrace the journey",
+                "",
             ReturnToInstruction =
-                "Vrátit: Embrace the journey, conquer challenges, and cherish",
+                "",
             Services =
-                "Služby: Embrace the journey, conquer challenges, and cherish the moments. Life is a canvas; paint it with passion. Shine brightly, the world awaits your brilliance.",
+                "",
             Notes =
-                "Poznámky: Embrace the journey, conquer challenges, and cherish the moments. Life is a canvas; paint it with pass"
+                ""
         };
     }
 }
