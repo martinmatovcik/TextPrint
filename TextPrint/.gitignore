@@ -606,3 +606,7 @@ fabric.properties
 .idea/**/azureSettings.xml
 
 # End of https://www.toptal.com/developers/gitignore/api/intellij
+/files/bezPosunuTextu.txt
+/files/cmr-test.txt
+/files/posunuvanieTextu.txt
+/files/test-2.txt
