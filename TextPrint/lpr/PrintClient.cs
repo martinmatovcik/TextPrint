@@ -5,7 +5,7 @@ namespace TextPrint.lpr;
 
 public class PrintClient
 {
-    public static void PrintStream(Stream stream, Encoding encoding)
+    public static async Task PrintStreamAsync(Stream stream, Encoding encoding)
     {
         string ipAddress = "192.168.50.159";
         int port = 9100;
@@ -19,10 +19,10 @@ public class PrintClient
             // Write ZPL String to connection
             StreamReader reader = new StreamReader(stream, encoding);
             StreamWriter writer = new StreamWriter(client.GetStream(), encoding);
-            string cmrText = reader.ReadToEnd();
+            string cmrText = await reader.ReadToEndAsync();
             reader.Close();
-            writer.Write(cmrText);
-            writer.Flush();
+            await writer.WriteAsync(cmrText);
+            await writer.FlushAsync();
             writer.Close();
             client.Close();
             
@@ -30,7 +30,7 @@ public class PrintClient
         }
         catch (Exception ex)
         {
-            // Catch Exception
+            Console.WriteLine(ex);
         }
     }
 }

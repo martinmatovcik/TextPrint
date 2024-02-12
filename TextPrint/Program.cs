@@ -10,11 +10,17 @@ public class Program
 {
     private static readonly Encoding? Encoding = CodePagesEncodingProvider.Instance.GetEncoding(852);
 
-    static void Main()
+    static async Task Main()
     {
-        var s = CmrTextFileGenerator.GenerateCmrTextAsStream(GenerateCmrFormDataDto(), CultureInfo.CurrentCulture, 0);
-        PrintClient.PrintStream(s, Encoding);
-        
+
+        for (int i = 0; i < 10; i++)
+        {
+            var s = CmrTextFileGenerator.GenerateCmrTextAsStream(GenerateCmrFormDataDto(), CultureInfo.CurrentCulture, 0);
+            await PrintClient.PrintStreamAsync(s, Encoding);
+            await Task.Delay(2000);
+            Console.WriteLine("Iteration: " + i);
+        }
+
         // FileCreator.SaveToFile(s, Encoding);
     }
 
@@ -26,7 +32,7 @@ public class Program
             ImportExport = TransportTypeEnum.Import,
 
             //1
-            CmrNumber = "CTR2024000882",
+            CmrNumber = "AAA2024000999",
             Ridic = "Martin Maťovčík",
             RegistracniZnackaTahac = "3SD2546",
             RegistracniZnackaNaves = "3SD2546",
