@@ -64,7 +64,7 @@ public class CmrTextFileGenerator
     private const int EndVariableRevLineFeedValue = 25;
     private static readonly byte[] StartVariableRevLineFeedCommand = { 27, 106, StartVariableRevLineFeedValue };
     // private static readonly byte[] VariableLineFeedToZeroCommand = { 27, 74, 35 };
-    private static readonly byte[] VariableLineFeedToZeroCommand = { 27, 106, 4 };
+    private static readonly byte[] VariableLineFeedToZeroCommand = { 27, 106, 0 };
 
     private const char EndOfLine = '\n';
     private const char Space = ' ';
@@ -106,7 +106,7 @@ public class CmrTextFileGenerator
             verticalOffSetMilimeters * MillimetersToInchConvention; //ready for vertical-MICRO-Offset feature
         int sumVariableLineFeeds = verticalOffsetInches + Field4VariableLineFeedValue;
         byte[] variableLineFeedStart = { 27, 74, (byte)verticalOffsetInches };
-        byte[] variableLineFeedEndFile = { 27, 74, (byte)(LineHeight - sumVariableLineFeeds) };
+        byte[] variableLineFeedEndFile = { 27, 74, (byte)(LineHeight - sumVariableLineFeeds + 2) };
 
         var initialFilePrinterCommands = JoinByteLists(new List<List<byte>>()
         {
@@ -135,7 +135,7 @@ public class CmrTextFileGenerator
         var cmrText =
             //Start
             AddControlCode(initialFilePrinterCommands) +
-            AddNewLines(TopMarginInLines + verticalOffSetLines) +
+            AddNewLines(TopMarginInLines + verticalOffSetLines - 1) +
             AddControlCode(StartVariableRevLineFeedCommand) +
 
             //1
