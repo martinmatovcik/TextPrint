@@ -48,7 +48,7 @@ public class CmrTextFileGenerator
     private static readonly byte[] SetLeftMargin = { 27, 108, PrinterLeftMargin };
     private static readonly byte[] FormFeed = { 12 };
     private static readonly byte[] HighSpeed = { 27, 35, 48 };
-    private static readonly byte[] PageLength = { 27, 67, 73 };
+    private static readonly byte[] PageLength = { 27, 67, 0, 12 };
     private static readonly byte[] EmulationMode = { 27, 123, 64 };
     private static readonly byte[] SixLpi = { 27, 50 };
     private static readonly byte[] EightLpi = { 27, 48 };
@@ -64,7 +64,7 @@ public class CmrTextFileGenerator
     private const int EndVariableRevLineFeedValue = 25;
     private static readonly byte[] StartVariableRevLineFeedCommand = { 27, 106, StartVariableRevLineFeedValue };
     // private static readonly byte[] VariableLineFeedToZeroCommand = { 27, 74, 35 };
-    private static readonly byte[] VariableLineFeedToZeroCommand = { 27, 106, 7 };
+    private static readonly byte[] VariableLineFeedToZeroCommand = { 27, 106, 4 };
 
     private const char EndOfLine = '\n';
     private const char Space = ' ';

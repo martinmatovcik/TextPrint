@@ -98,8 +98,8 @@ public class Program
             DeclText4 = "",
 
             //16
-            VystaveneDne = new LocalDate(2024, 1, 17),
-            VystaveneV = "",
+            VystaveneDne = new LocalDate(2025, 3, 17),
+            VystaveneV = "--------------------------",
 
             //20
             WeightingInstruction = "",
