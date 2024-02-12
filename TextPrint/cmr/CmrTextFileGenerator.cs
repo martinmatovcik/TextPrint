@@ -106,7 +106,7 @@ public class CmrTextFileGenerator
             verticalOffSetMilimeters * MillimetersToInchConvention; //ready for vertical-MICRO-Offset feature
         int sumVariableLineFeeds = verticalOffsetInches + Field4VariableLineFeedValue;
         byte[] variableLineFeedStart = { 27, 74, (byte)verticalOffsetInches };
-        byte[] variableLineFeedEndFile = { 27, 74, (byte)(LineHeight - sumVariableLineFeeds + 2) };
+        byte[] variableLineFeedEndFile = { 27, 74, (byte)(LineHeight - sumVariableLineFeeds + 7) };
 
         var initialFilePrinterCommands = JoinByteLists(new List<List<byte>>()
         {
