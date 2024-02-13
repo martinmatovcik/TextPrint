@@ -13,7 +13,7 @@ public class Program
     static async Task Main()
     {
 
-        for (int i = 0; i < 10; i++)
+        for (int i = 0; i < 50; i++)
         {
             var s = CmrTextFileGenerator.GenerateCmrTextAsStream(GenerateCmrFormDataDto(), CultureInfo.CurrentCulture, 0);
             await PrintClient.PrintStreamAsync(s, Encoding);
@@ -93,7 +93,7 @@ public class Program
 
             //4
             CasPristaveni = new LocalDateTime(2024, 2, 16, 13, 0),
-            MistoPristaveni = "U příjemce__1__2__3",
+            MistoPristaveni = "U příjemce",
 
             //5
             CisloPlomby = "",

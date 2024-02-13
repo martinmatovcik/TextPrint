@@ -7,7 +7,8 @@ public class PrintClient
 {
     public static async Task PrintStreamAsync(Stream stream, Encoding encoding)
     {
-        string ipAddress = "192.168.50.159";
+        // string ipAddress = "192.168.50.159";  //STX-Kancl
+        string ipAddress = "192.168.22.192";  //CETR
         int port = 9100;
         
         try

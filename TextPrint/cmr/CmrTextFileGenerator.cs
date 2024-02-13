@@ -58,7 +58,7 @@ public class CmrTextFileGenerator
     private static readonly byte[] Field4VariableLineFeedCommand = { 27, 74, Field4VariableLineFeedValue };
 
     //CAREFULL!!!!!
-    private const int StartVariableRevLineFeedValue = 35;
+    private const int StartVariableRevLineFeedValue = 30;
     private static readonly byte[] StartVariableRevLineFeedCommand = { 27, 106, StartVariableRevLineFeedValue };
     private static readonly byte[] VariableLineFeedToZeroCommand = { 27, 106, 7 };
 
@@ -113,7 +113,7 @@ public class CmrTextFileGenerator
 
         var cmrNumberFormattingOnPrinterCommand = JoinByteLists(new List<List<byte>>()
         {
-            new(DoubleWidthOn), new(DoubleHeightOn),
+            new(DoubleWidthOn), new(DoubleHeightOn), new(ItalicsOff)
         });
 
         var cmrNumberFormattingOffPrinterCommand = JoinByteLists(new List<List<byte>>()
@@ -122,12 +122,15 @@ public class CmrTextFileGenerator
         });
 
         var endFilePrinterCommands = JoinByteLists(new List<List<byte>>()
-            { new(FormFeed), new(variableLineFeedEndFile) });
+            { 
+                new(FormFeed),
+                // new(variableLineFeedEndFile)
+            });
 
         var cmrText =
             //Start
             AddControlCode(initialFilePrinterCommands) +
-            AddNewLines(TopMarginInLines + verticalOffSetLines) +
+            AddNewLines(TopMarginInLines + verticalOffSetLines + 1) +
             AddControlCode(StartVariableRevLineFeedCommand) +
 
             //1
@@ -207,7 +210,9 @@ public class CmrTextFileGenerator
             GenerateField20(formData) +
 
             //End
-            AddControlCode(endFilePrinterCommands) + AddControlCode(VariableLineFeedToZeroCommand);
+            AddControlCode(endFilePrinterCommands)
+            // + AddControlCode(VariableLineFeedToZeroCommand)
+            ;
 
         return new MemoryStream(Encoding.GetBytes(cmrText));
     }
