@@ -51,6 +51,9 @@ public class CmrTextFileGenerator
     private static readonly byte[] SixLpi = { 27, 50 };
     private static readonly byte[] EightLpi = { 27, 48 };
     private static readonly byte[] TenCpi = { 27, 80 };
+    
+    private static readonly byte[] Field13EndVariableLineFeed = { 27, 74, 5 };
+    private static readonly byte[] Field14EndVariableRevLineFeed = { 27, 106, 5 };
 
     //variable line-feed command { 27, 74, n } -> n = posuv (n/216inch); 0 <= n <= 255
     //variable reverse-line-feed command { 27, 106, n } -> n = posuv (n/216inch); 0 <= n <= 255
@@ -322,6 +325,7 @@ public class CmrTextFileGenerator
         var actualLines = output.Count(c => c == EndOfLine);
         output += AddNewLines(Field9To13MaxLines - actualLines);
 
+        output += AddControlCode(Field13EndVariableLineFeed);
         return output;
     }
 
@@ -358,6 +362,8 @@ public class CmrTextFileGenerator
 
         var actualLines = output.Count(c => c == EndOfLine);
         output += AddNewLines(Field14MaxLines - actualLines);
+
+        output += AddControlCode(Field14EndVariableRevLineFeed);
 
         return output;
     }
