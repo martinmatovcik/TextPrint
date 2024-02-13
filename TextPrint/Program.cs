@@ -13,7 +13,7 @@ public class Program
 
     static async Task Main()
     {
-        const bool printOnPrinter = false;
+        const bool printOnPrinter = true;
 
         if (printOnPrinter)
         {
@@ -206,13 +206,13 @@ public class Program
             CloText1 = "CZ590201 - PARDUBICE",
             CloText2 = "Palackého 2659",
             CloText3 = "asdsad",
-            CloText4 = "",
+            CloText4 = "asdasdasd",
 
             DeclText1Prefix = true,
             DeclText1 = "schvaleny prijemce",
             DeclText2 = "CLENI NA VYKLADCE",
-            DeclText3 = "",
-            DeclText4 = "",
+            DeclText3 = "asdsadasdsad",
+            DeclText4 = "asdfasdfasfsdafsad",
 
             //16
             VystaveneDne = new LocalDate(2024, 2, 13),

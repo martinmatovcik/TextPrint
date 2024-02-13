@@ -298,21 +298,18 @@ public class CmrTextFileGenerator
 
         if (adrInstruction.Length > AdrInstructionLineLength * 2)
         {
-            adrInstruction = adrInstruction.Substring(0, AdrInstructionLineLength * 2 + 1); //+1 is for EndOfLine char
+            adrInstruction = adrInstruction.Substring(0, AdrInstructionLineLength * 2);
         }
 
         var words = adrInstruction.Split(Space);
 
         foreach (var word in words)
         {
-            if ((adrInstructionLine + word).Length > AdrInstructionLineLength)
+            if ((adrInstructionLine + word).Length > AdrInstructionLineLength && addNewLine)
             {
-                if (addNewLine)
-                {
-                    adrInstructionLine = adrInstructionLine.TrimEnd();
-                    adrInstructionLine += EndOfLine;
-                    addNewLine = false;
-                }
+                adrInstructionLine = adrInstructionLine.TrimEnd();
+                adrInstructionLine += EndOfLine;
+                addNewLine = false;
             }
 
             adrInstructionLine += word + Space;
