@@ -199,7 +199,7 @@ public class Program
             TaraKontejneru = 4000,
             ImportVaha = 16625,
             AdrInstruction =
-                "\"ADR - popis viz. Doplňkový list ADR, ADR - siehe in der Ergänzungsliste ADR\"",
+                "ADR - popis viz. Doplňkový list ADR, ADR - siehe inder Ergänzungsliste ADRsiehe inder Ergänzungsliste ADR1234678912345678912345678",
 
             //14
             CloText1Prefix = true,

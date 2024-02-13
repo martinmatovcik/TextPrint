@@ -84,6 +84,10 @@ public class CmrTextFileGenerator
     private const int Field12Padding = 4;
     private const int Field11And12FullWidth = 31;
 
+    private const int AdrInstructionLineLength = 55;
+
+    private const int Field9To13MaxLines = 10;
+
     //Field 14
     private const int Field14Padding = 6;
     private const int Field14MaxLines = 8;
@@ -122,10 +126,10 @@ public class CmrTextFileGenerator
         });
 
         var endFilePrinterCommands = JoinByteLists(new List<List<byte>>()
-            { 
-                new(FormFeed),
-                // new(variableLineFeedEndFile)
-            });
+        {
+            new(FormFeed),
+            // new(variableLineFeedEndFile)
+        });
 
         var cmrText =
             //Start
@@ -288,23 +292,38 @@ public class CmrTextFileGenerator
         output += EndOfLine;
 
         //Line 8 + 9
-        var adrInstructionLine = formData.AdrInstruction;
-        var lineLength = 55;
-        if (adrInstructionLine.Length > lineLength)
+        var adrInstructionLine = string.Empty;
+        var adrInstruction = formData.AdrInstruction;
+        var addNewLine = true;
+
+        if (adrInstruction.Length > AdrInstructionLineLength * 2)
         {
-            adrInstructionLine = adrInstructionLine.Insert(lineLength, EndOfLine.ToString());
+            adrInstruction = adrInstruction.Substring(0, AdrInstructionLineLength * 2 + 1); //+1 is for EndOfLine char
         }
 
-        if (adrInstructionLine.Length > lineLength * 2)
+        var words = adrInstruction.Split(Space);
+
+        foreach (var word in words)
         {
-            adrInstructionLine = adrInstructionLine.Substring(0, lineLength * 2 + 1);
+            if ((adrInstructionLine + word).Length > AdrInstructionLineLength)
+            {
+                if (addNewLine)
+                {
+                    adrInstructionLine = adrInstructionLine.TrimEnd();
+                    adrInstructionLine += EndOfLine;
+                    addNewLine = false;
+                }
+            }
+
+            adrInstructionLine += word + Space;
         }
+
+        adrInstructionLine = adrInstructionLine.TrimEnd();
 
         output += adrInstructionLine + EndOfLine;
 
-        var maxLines = 10;
         var actualLines = output.Count(c => c == EndOfLine);
-        output += AddNewLines(maxLines - actualLines);
+        output += AddNewLines(Field9To13MaxLines - actualLines);
 
         return output;
     }
