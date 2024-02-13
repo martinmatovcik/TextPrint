@@ -60,12 +60,13 @@ public class CmrTextFileGenerator
     private static readonly byte[] Field4VariableLineFeedCommand = { 27, 74, Field4VariableLineFeedValue };
 
     //CAREFULL!!!!!
-    private const int StartVariableRevLineFeedValue = 35;
+    private const int StartVariableRevLineFeedValue = 36;
     private const int EndVariableRevLineFeedValue = 25;
     private static readonly byte[] StartVariableRevLineFeedCommand = { 27, 106, StartVariableRevLineFeedValue };
-    // private static readonly byte[] VariableLineFeedToZeroCommand = { 27, 74, 35 };
     private static readonly byte[] VariableLineFeedToZeroCommand = { 27, 106, 0 };
-
+    
+    private static readonly byte[] VariableLineFeed = { 27, 74, 0};
+    
     private const char EndOfLine = '\n';
     private const char Space = ' ';
 
@@ -106,7 +107,7 @@ public class CmrTextFileGenerator
             verticalOffSetMilimeters * MillimetersToInchConvention; //ready for vertical-MICRO-Offset feature
         int sumVariableLineFeeds = verticalOffsetInches + Field4VariableLineFeedValue;
         byte[] variableLineFeedStart = { 27, 74, (byte)verticalOffsetInches };
-        byte[] variableLineFeedEndFile = { 27, 74, (byte)(LineHeight - sumVariableLineFeeds + 7) };
+        byte[] variableLineFeedEndFile = { 27, 74, (byte)(LineHeight - sumVariableLineFeeds + 4) };
 
         var initialFilePrinterCommands = JoinByteLists(new List<List<byte>>()
         {
@@ -215,7 +216,8 @@ public class CmrTextFileGenerator
             GenerateField20(formData) +
 
             //End
-            AddControlCode(endFilePrinterCommands) + AddControlCode(VariableLineFeedToZeroCommand) + AddControlCode(FormFeed);
+            AddControlCode(FormFeed);
+            // AddControlCode(VariableLineFeedToZeroCommand) + AddControlCode(endFilePrinterCommands) + AddControlCode(FormFeed) + AddControlCode(VariableLineFeed);
 
         return new MemoryStream(Encoding.GetBytes(cmrText));
     }

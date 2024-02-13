@@ -45,19 +45,55 @@ public class Program
 
             //2
             OdesilatelPrijemce1 = "WESTROCK PACKAGING, VYKL. KOCLÍŘOV",
-            OdesilatelPrijemce2 = "SchumiTransport, Koclířov 258",
-            OdesilatelPrijemce3 = "KOCLIROV,",
-            OdesilatelPrijemce4 = "56911 CZ",
+            OdesilatelPrijemce2 = "",
+            OdesilatelPrijemce3 = "",
+            OdesilatelPrijemce4 = "",
+
+            // //2
+            // OdesilatelPrijemce1 = "",
+            // OdesilatelPrijemce2 = "SchumiTransport, Koclířov 258",
+            // OdesilatelPrijemce3 = "",
+            // OdesilatelPrijemce4 = "",
+            
+            // //2
+            // OdesilatelPrijemce1 = "",
+            // OdesilatelPrijemce2 = "",
+            // OdesilatelPrijemce3 = "KOCLIROV,",
+            // OdesilatelPrijemce4 = "",
+            
+            // //2
+            // OdesilatelPrijemce1 = "",
+            // OdesilatelPrijemce2 = "",
+            // OdesilatelPrijemce3 = "",
+            // OdesilatelPrijemce4 = "56911 CZ",
 
             //3
             AdresaNakladky1 = "WESTROCK PACKAGING, VYKL. KOCLÍŘOV",
-            AdresaNakladky2 = "SchumiTransport, Koclířov 258",
-            AdresaNakladky3 = "KOCLIROV, 56911 CZ",
-            AdresaNakladky4 = "pan Paclík 737 515 907 F:",
+            AdresaNakladky2 = "",
+            AdresaNakladky3 = "",
+            AdresaNakladky4 = "",
+
+            // //3
+            // AdresaNakladky1 = "",
+            // AdresaNakladky2 = "SchumiTransport, Koclířov 258",
+            // AdresaNakladky3 = "",
+            // AdresaNakladky4 = "",
+            //
+            // //3
+            // AdresaNakladky1 = "",
+            // AdresaNakladky2 = "",
+            // AdresaNakladky3 = "KOCLIROV, 56911 CZ",
+            // AdresaNakladky4 = "",
+            //
+            // //3
+            // AdresaNakladky1 = "",
+            // AdresaNakladky2 = "",
+            // AdresaNakladky3 = "",
+            // AdresaNakladky4 = "pan Paclík 737 515 907 F:",
 
             //4
             CasPristaveni = new LocalDateTime(2024, 2, 16, 13, 0),
-            MistoPristaveni = "U příjemce",
+            MistoPristaveni = "U příjemce__1__2__3",
 
             //5
             CisloPlomby = "",
@@ -68,8 +104,26 @@ public class Program
             Dopravce3 = "Praha 4",
             Dopravce4 = "142 00 CZ",
 
+            // //6
+            // Dopravce1 = "ACKERMAN II. spol. s r.o.__1",
+            // Dopravce2 = "Papírníkova 612__1",
+            // Dopravce3 = "Praha 4__1",
+            // Dopravce4 = "142 00 CZ__1",
+
+            // //6
+            // Dopravce1 = "ACKERMAN II. spol. s r.o.__1__2",
+            // Dopravce2 = "Papírníkova 612__1__2",
+            // Dopravce3 = "Praha 4__1__2",
+            // Dopravce4 = "142 00 CZ__1__2",
+
+            // //6
+            // Dopravce1 = "ACKERMAN II. spol. s r.o.__1__2__3",
+            // Dopravce2 = "Papírníkova 612__1__2__3",
+            // Dopravce3 = "Praha 4__1__2__3",
+            // Dopravce4 = "142 00 CZ__1__2__3",
+
             //8
-            PripojeneDoklady = "",
+            PripojeneDoklady = "ABCDEFGHIJKLMNO",
 
             //9,10,11,12
             WasteInstruction = "",
@@ -105,7 +159,7 @@ public class Program
 
             //16
             VystaveneDne = new LocalDate(2025, 3, 17),
-            VystaveneV = "--------------------------",
+            VystaveneV = "111111______11111",
 
             //20
             WeightingInstruction = "",
