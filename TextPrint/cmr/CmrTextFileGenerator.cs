@@ -13,7 +13,7 @@ public class CmrTextFileGenerator
     private const int OutsideFormLeftMargin = 3;
     private const int InsideFormLeftPadding = 1;
     private const int PrinterLeftMargin = OutsideFormLeftMargin + InsideFormLeftPadding;
-    private const int TopMarginInLines = 2;
+    private const int TopMarginInLines = 3;
 
     //CMR fields widths and starting points
     private const int Fields1To8Width = 36;
@@ -130,7 +130,7 @@ public class CmrTextFileGenerator
         var cmrText =
             //Start
             AddControlCode(initialFilePrinterCommands) +
-            AddNewLines(TopMarginInLines + verticalOffSetLines + 1) +
+            AddNewLines(TopMarginInLines + verticalOffSetLines) +
             AddControlCode(StartVariableRevLineFeedCommand) +
 
             //1
