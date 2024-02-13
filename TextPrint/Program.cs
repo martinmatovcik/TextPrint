@@ -13,16 +13,25 @@ public class Program
 
     static async Task Main()
     {
+        const bool printOnPrinter = false;
 
-        for (int i = 0; i < 1; i++)
+        if (printOnPrinter)
         {
-            var s = CmrTextFileGenerator.GenerateCmrTextAsStream(GenerateCmrFormDataDto(), CultureInfo.CurrentCulture, 0);
-            await PrintClient.PrintStreamAsync(s, Encoding);
-            await Task.Delay(2000);
-            Console.WriteLine("Iteration: " + i);
+            for (int i = 0; i < 1; i++)
+            {
+                var s = CmrTextFileGenerator.GenerateCmrTextAsStream(GenerateCmrFormDataDto(),
+                    CultureInfo.CurrentCulture, 0);
+                await PrintClient.PrintStreamAsync(s, Encoding);
+                await Task.Delay(2000);
+                Console.WriteLine("Iteration: " + i);
+            }
         }
-
-        // FileCreator.SaveToFile(s, Encoding);
+        else
+        {
+            var stream =
+                CmrTextFileGenerator.GenerateCmrTextAsStream(GenerateCmrFormDataDto(), CultureInfo.CurrentCulture, 0);
+            FileCreator.SaveToFile(stream, Encoding);
+        }
     }
 
     private static CmrFormDataDto GenerateCmrFormDataDto()
@@ -49,7 +58,7 @@ public class Program
             OdesilatelPrijemce2 = "SchumiTransport, Koclířov 258",
             OdesilatelPrijemce3 = "KOCLIROV,",
             OdesilatelPrijemce4 = "56911 CZ",
-            
+
             // //2
             // OdesilatelPrijemce1 = "WESTROCK PACKAGING, VYKL. KOCLÍŘOV",
             // OdesilatelPrijemce2 = "",
@@ -61,13 +70,13 @@ public class Program
             // OdesilatelPrijemce2 = "SchumiTransport, Koclířov 258",
             // OdesilatelPrijemce3 = "",
             // OdesilatelPrijemce4 = "",
-            
+
             // //2
             // OdesilatelPrijemce1 = "",
             // OdesilatelPrijemce2 = "",
             // OdesilatelPrijemce3 = "KOCLIROV,",
             // OdesilatelPrijemce4 = "",
-            
+
             // //2
             // OdesilatelPrijemce1 = "",
             // OdesilatelPrijemce2 = "",
@@ -105,7 +114,7 @@ public class Program
             // AdresaNakladky4 = "pan Paclík 737 515 907 F:",
 
             //4
-            CasPristaveni =  new LocalDateTime(2024, 4, 1, 13, 0),
+            CasPristaveni = new LocalDateTime(2024, 4, 1, 13, 0),
             MistoPristaveni = "U příjemce",
 
             //5
@@ -206,7 +215,7 @@ public class Program
             DeclText4 = "",
 
             //16
-            VystaveneDne = new LocalDate(2024,2,13),
+            VystaveneDne = new LocalDate(2024, 2, 13),
             VystaveneV = "Česká Třebová",
 
             //20
