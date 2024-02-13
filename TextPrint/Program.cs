@@ -1,6 +1,7 @@
 ﻿using System.Globalization;
 using System.Text;
 using NodaTime;
+using NodaTime.Extensions;
 using TextPrint.cmr;
 using TextPrint.lpr;
 
@@ -13,7 +14,7 @@ public class Program
     static async Task Main()
     {
 
-        for (int i = 0; i < 50; i++)
+        for (int i = 0; i < 1; i++)
         {
             var s = CmrTextFileGenerator.GenerateCmrTextAsStream(GenerateCmrFormDataDto(), CultureInfo.CurrentCulture, 0);
             await PrintClient.PrintStreamAsync(s, Encoding);
@@ -45,9 +46,15 @@ public class Program
 
             //2
             OdesilatelPrijemce1 = "WESTROCK PACKAGING, VYKL. KOCLÍŘOV",
-            OdesilatelPrijemce2 = "",
-            OdesilatelPrijemce3 = "",
-            OdesilatelPrijemce4 = "",
+            OdesilatelPrijemce2 = "SchumiTransport, Koclířov 258",
+            OdesilatelPrijemce3 = "KOCLIROV,",
+            OdesilatelPrijemce4 = "56911 CZ",
+            
+            // //2
+            // OdesilatelPrijemce1 = "WESTROCK PACKAGING, VYKL. KOCLÍŘOV",
+            // OdesilatelPrijemce2 = "",
+            // OdesilatelPrijemce3 = "",
+            // OdesilatelPrijemce4 = "",
 
             // //2
             // OdesilatelPrijemce1 = "",
@@ -69,9 +76,15 @@ public class Program
 
             //3
             AdresaNakladky1 = "WESTROCK PACKAGING, VYKL. KOCLÍŘOV",
-            AdresaNakladky2 = "",
-            AdresaNakladky3 = "",
-            AdresaNakladky4 = "",
+            AdresaNakladky2 = "SchumiTransport, Koclířov 258",
+            AdresaNakladky3 = "KOCLIROV, 56911 CZ",
+            AdresaNakladky4 = "pan Paclík 737 515 907 F:",
+
+            // //3
+            // AdresaNakladky1 = "WESTROCK PACKAGING, VYKL. KOCLÍŘOV",
+            // AdresaNakladky2 = "",
+            // AdresaNakladky3 = "",
+            // AdresaNakladky4 = "",
 
             // //3
             // AdresaNakladky1 = "",
@@ -92,7 +105,7 @@ public class Program
             // AdresaNakladky4 = "pan Paclík 737 515 907 F:",
 
             //4
-            CasPristaveni = new LocalDateTime(2024, 2, 16, 13, 0),
+            CasPristaveni =  new LocalDateTime(2024, 4, 1, 13, 0),
             MistoPristaveni = "U příjemce",
 
             //5
@@ -123,18 +136,53 @@ public class Program
             // Dopravce4 = "142 00 CZ__1__2__3",
 
             //8
-            PripojeneDoklady = "ABCDEFGHIJKLMNO",
+            PripojeneDoklady = "",
 
             //9,10,11,12
-            WasteInstruction = "",
+            WasteInstruction = "Waste instruction",
 
-            TemperatureInstruction = "",
+            TemperatureInstruction = "Teplota od do...",
 
-            OwnerText = "",
-            DruhKontejneru = "",
-            CisloKontejneru = "",
+            OwnerText = "CNG",
+            DruhKontejneru = "40hc",
+            CisloKontejneru = "WFHU 518088-2",
             Zbozi = new List<ZboziData>
             {
+                new()
+                {
+                    DruhObalu = "ROL",
+                    Oznaceni = "48103210"
+                },
+                new()
+                {
+                    DruhObalu = "ROL",
+                    Oznaceni = "48103211"
+                },
+                new()
+                {
+                    DruhObalu = "ROL",
+                    Oznaceni = "48103212"
+                },
+                new()
+                {
+                    DruhObalu = "ROL",
+                    Oznaceni = "48103213"
+                },
+                new()
+                {
+                    DruhObalu = "ROL",
+                    Oznaceni = "48103214"
+                },
+                new()
+                {
+                    DruhObalu = "ROL",
+                    Oznaceni = "48103215"
+                },
+                new()
+                {
+                    DruhObalu = "PAL",
+                    Oznaceni = "48103210"
+                },
             },
             UnloadingCode = "",
 
@@ -142,35 +190,35 @@ public class Program
             TaraKontejneru = 4000,
             ImportVaha = 16625,
             AdrInstruction =
-                "",
+                "\"ADR - popis viz. Doplňkový list ADR, ADR - siehe in der Ergänzungsliste ADR\"",
 
             //14
-            CloText1Prefix = false,
-            CloText1 = "",
-            CloText2 = "",
-            CloText3 = "",
+            CloText1Prefix = true,
+            CloText1 = "CZ590201 - PARDUBICE",
+            CloText2 = "Palackého 2659",
+            CloText3 = "asdsad",
             CloText4 = "",
 
-            DeclText1Prefix = false,
-            DeclText1 = "",
-            DeclText2 = "",
+            DeclText1Prefix = true,
+            DeclText1 = "schvaleny prijemce",
+            DeclText2 = "CLENI NA VYKLADCE",
             DeclText3 = "",
             DeclText4 = "",
 
             //16
-            VystaveneDne = new LocalDate(2025, 3, 17),
-            VystaveneV = "111111______11111",
+            VystaveneDne = new LocalDate(2024,2,13),
+            VystaveneV = "Česká Třebová",
 
             //20
-            WeightingInstruction = "",
+            WeightingInstruction = "JET PO NAKLÁDCE NA VÁHU!/LITRY",
             PickUpInstruction =
-                "",
+                "Vyzvednout: Embrace the journey",
             ReturnToInstruction =
-                "",
+                "Vrátit: Embrace the journey, conquer challenges, and cherish",
             Services =
-                "",
+                "Služby: Embrace the journey, conquer challenges, and cherish the moments. Life is a canvas; paint it with passion. Shine brightly, the world awaits your brilliance.",
             Notes =
-                ""
+                "Poznámky: Embrace the journey, conquer challenges, and cherish the moments. Life is a canvas; paint it with pass"
         };
     }
 }
