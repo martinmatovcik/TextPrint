@@ -49,21 +49,17 @@ public class CmrTextFileGenerator
     private static readonly byte[] PageLength = { 27, 67, 0, 12 };
     private static readonly byte[] EmulationMode = { 27, 123, 64 };
     private static readonly byte[] SixLpi = { 27, 50 };
-    private static readonly byte[] EightLpi = { 27, 48 };
     private static readonly byte[] TenCpi = { 27, 80 };
-    
+
     private static readonly byte[] Field13EndVariableLineFeed = { 27, 74, 5 };
     private static readonly byte[] Field14EndVariableRevLineFeed = { 27, 106, 5 };
 
-    //variable line-feed command { 27, 74, n } -> n = posuv (n/216inch); 0 <= n <= 255
-    //variable reverse-line-feed command { 27, 106, n } -> n = posuv (n/216inch); 0 <= n <= 255
     private const int Field4VariableLineFeedValue = 28;
     private static readonly byte[] Field4VariableLineFeedCommand = { 27, 74, Field4VariableLineFeedValue };
 
     //CAREFULL!!!!!
     private const int StartVariableRevLineFeedValue = 30;
     private static readonly byte[] StartVariableRevLineFeedCommand = { 27, 106, StartVariableRevLineFeedValue };
-    private static readonly byte[] VariableLineFeedToZeroCommand = { 27, 106, 7 };
 
     private const char EndOfLine = '\n';
     private const char Space = ' ';
@@ -102,18 +98,17 @@ public class CmrTextFileGenerator
     private const int Field20LineLength = Field20PickupReturnLineLength + Field20PickupReturnSpacesBetween;
 
     public static Stream GenerateCmrTextAsStream(CmrFormDataDto formData, CultureInfo cultureInfo,
-        int verticalOffSetLines)
+        int verticalOffSet)
     {
-        var verticalOffSetMilimeters = 0; //ready for vertical-MICRO-Offset feature
-        int verticalOffsetInches =
-            verticalOffSetMilimeters * MillimetersToInchConvention; //ready for vertical-MICRO-Offset feature
-        int sumVariableLineFeeds = verticalOffsetInches + Field4VariableLineFeedValue;
-        byte[] variableLineFeedStart = { 27, 74, (byte)verticalOffsetInches };
-        byte[] variableLineFeedEndFile = { 27, 74, (byte)(LineHeight - sumVariableLineFeeds) };
+        var verticalOffSetCommand = verticalOffSet is > 0 or 0
+            ? new byte[] { 27, 74, (byte)verticalOffSet }
+            : new byte[] { 27, 106, (byte)Math.Abs(verticalOffSet) };
 
         var initialFilePrinterCommands = JoinByteLists(new List<List<byte>>()
         {
-            new(EmulationMode), new(SixLpi), new(TenCpi), new(PageLength), new(HighSpeed), new(Ibm852CharacterSet),
+            new(EmulationMode), new(SixLpi), 
+            new(TenCpi), new(PageLength), 
+            new(HighSpeed), new(Ibm852CharacterSet),
             new(ItalicsOff), new(DoubleWidthOff),
             new(DoubleHeightOff), new(SetLeftMargin)
         });
@@ -131,14 +126,14 @@ public class CmrTextFileGenerator
         var endFilePrinterCommands = JoinByteLists(new List<List<byte>>()
         {
             new(FormFeed),
-            // new(variableLineFeedEndFile)
         });
 
         var cmrText =
             //Start
             AddControlCode(initialFilePrinterCommands) +
-            AddNewLines(TopMarginInLines + verticalOffSetLines) +
+            AddNewLines(TopMarginInLines) +
             AddControlCode(StartVariableRevLineFeedCommand) +
+            AddControlCode(verticalOffSetCommand) +
 
             //1
             AddSpaces(Field12DriverStartingPointFromLeftMargin) + formData.Ridic + EndOfLine +
@@ -217,9 +212,7 @@ public class CmrTextFileGenerator
             GenerateField20(formData) +
 
             //End
-            AddControlCode(endFilePrinterCommands)
-            // + AddControlCode(VariableLineFeedToZeroCommand)
-            ;
+            AddControlCode(endFilePrinterCommands);
 
         return new MemoryStream(Encoding.GetBytes(cmrText));
     }

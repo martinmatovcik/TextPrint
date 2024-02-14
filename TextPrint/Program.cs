@@ -221,9 +221,9 @@ public class Program
             //20
             WeightingInstruction = "JET PO NAKLÁDCE NA VÁHU!/LITRY",
             PickUpInstruction =
-                "Vyzvednout: Embrace the journey",
+                "Vyzvednout: Embrace the journeyEmbrace the journeyEmbrace the journeyEmbrace the journeyEmbrace the journeyEmbrace the journey",
             ReturnToInstruction =
-                "Vrátit: Embrace the journey, conquer challenges, and cherish",
+                "Vrátit: Embrace the journey, conquer challenges, and cherishEmbrace the journey, conquer challenges, and cherishEmbrace the journey, conquer challenges, and cherishEmbrace the journey, conquer challenges, and cherish",
             Services =
                 "Služby: Embrace the journey, conquer challenges, and cherish the moments. Life is a canvas; paint it with passion. Shine brightly, the world awaits your brilliance.",
             Notes =
