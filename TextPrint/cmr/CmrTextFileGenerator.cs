@@ -51,7 +51,7 @@ public class CmrTextFileGenerator
     private static readonly byte[] SixLpi = { 27, 50 };
     private static readonly byte[] EightLpi = { 27, 48 };
     private static readonly byte[] TenCpi = { 27, 80 };
-
+    
     private static readonly byte[] Field13EndVariableLineFeed = { 27, 74, 5 };
     private static readonly byte[] Field14EndVariableRevLineFeed = { 27, 106, 5 };
 
@@ -370,25 +370,74 @@ public class CmrTextFileGenerator
 
     private static string GenerateField20(CmrFormDataDto formData)
     {
+        var field20ParagraphLineLengthTimesTwo = Field20ParagraphLineLength * 2;
+
+        var pickUpInstructionLine1 = formData.PickUpInstruction;
+        var pickUpInstructionLine2 = string.Empty;
+        var pickUpInstructionLine3 = string.Empty;
+        var pickupInstructionLength = formData.PickUpInstruction.Length;
+
+        if (pickupInstructionLength > Field20ParagraphLineLength)
+        {
+            pickUpInstructionLine2 =
+                pickUpInstructionLine1.Substring(Field20ParagraphLineLength,
+                    pickupInstructionLength - Field20ParagraphLineLength);
+            pickUpInstructionLine1 = pickUpInstructionLine1.Substring(0, Field20ParagraphLineLength);
+        }
+
+        if (pickupInstructionLength > field20ParagraphLineLengthTimesTwo)
+        {
+            var pickUpInstructionLine2Length = pickUpInstructionLine2.Length;
+            pickUpInstructionLine3 =
+                pickUpInstructionLine2.Substring(Field20ParagraphLineLength,
+                    pickUpInstructionLine2Length >= field20ParagraphLineLengthTimesTwo
+                        ? Field20ParagraphLineLength
+                        : pickUpInstructionLine2Length - Field20ParagraphLineLength);
+            pickUpInstructionLine2 = pickUpInstructionLine2.Substring(0, Field20ParagraphLineLength);
+        }
+
+        var returnToInstructionLine1 = formData.ReturnToInstruction;
+        var returnToInstructionLine2 = string.Empty;
+        var returnToInstructionLine3 = string.Empty;
+        var returnToInstructionLength = formData.ReturnToInstruction.Length;
+
+        if (returnToInstructionLength > Field20ParagraphLineLength)
+        {
+            returnToInstructionLine2 =
+                returnToInstructionLine1.Substring(Field20ParagraphLineLength,
+                    returnToInstructionLength - Field20ParagraphLineLength);
+            returnToInstructionLine1 = returnToInstructionLine1.Substring(0, Field20ParagraphLineLength);
+        }
+
+        if (returnToInstructionLength > Field20ParagraphLineLength * 2)
+        {
+            var returnToInstructionLine2Length = returnToInstructionLine2.Length;
+            returnToInstructionLine3 =
+                returnToInstructionLine2.Substring(Field20ParagraphLineLength,
+                    returnToInstructionLine2Length >= field20ParagraphLineLengthTimesTwo
+                        ? Field20ParagraphLineLength
+                        : returnToInstructionLine2Length - Field20ParagraphLineLength);
+            returnToInstructionLine2 = returnToInstructionLine2.Substring(0, Field20ParagraphLineLength);
+        }
+
         //Weight Instruction
         var output = string.IsNullOrEmpty(formData.WeightingInstruction)
             ? EndOfLine.ToString()
             : AppendLineWithPaddingOrEmptyString(7, formData.WeightingInstruction);
 
         //Pickup / Return Instruction
-        var pickUpReturnToMaxNumberOfLines = 3;
-        
-        string[] pickUpInstructionLines = FormatTextInField20(formData.PickUpInstruction, Field20ParagraphLineLength, pickUpReturnToMaxNumberOfLines);
-        string[] returnToInstructionLines = FormatTextInField20(formData.ReturnToInstruction, Field20ParagraphLineLength, pickUpReturnToMaxNumberOfLines);
-
-        for (int i = 0; i < pickUpReturnToMaxNumberOfLines; i++)
-        {
-             output += pickUpInstructionLines[i] +
-                    AddSpaces(Field20ParagraphLineLength - pickUpInstructionLines[i].Length +
-                              Field20PickupReturnSpacesBetween) +
-                    returnToInstructionLines[i] + EndOfLine;
-        }
-        output += AddNewLines(2);
+        output += pickUpInstructionLine1 +
+                  AddSpaces(Field20ParagraphLineLength - pickUpInstructionLine1.Length +
+                            Field20PickupReturnSpacesBetween) +
+                  returnToInstructionLine1 + EndOfLine +
+                  pickUpInstructionLine2 +
+                  AddSpaces(Field20ParagraphLineLength - pickUpInstructionLine2.Length +
+                            Field20PickupReturnSpacesBetween) +
+                  returnToInstructionLine2 + EndOfLine +
+                  pickUpInstructionLine3 +
+                  AddSpaces(Field20ParagraphLineLength - pickUpInstructionLine3.Length +
+                            Field20PickupReturnSpacesBetween) +
+                  returnToInstructionLine3 + AddNewLines(2);
 
 
         //Services
@@ -425,31 +474,6 @@ public class CmrTextFileGenerator
 
         output += notesLine;
         return output;
-    }
-
-    private static string[] FormatTextInField20(string content, int lineLength, int maxNumberOfLines)
-    {
-        var lines = new string[maxNumberOfLines];
-        Array.Fill(lines, string.Empty);
-        
-        if (content.Length > lineLength * 3)
-        {
-            content = content.Substring(0, lineLength * 3);
-        }
-
-        var words = content.Split(Space).ToList();
-        for (var i = 0; i < lines.Length; i++)
-        {
-            for (var j = 0; j < words.Count; j++)
-            {
-                var word = words[j];
-                var wordAndSpace = word + Space;
-                if ((lines[i] + word).Length > Field20ParagraphLineLength * (i + 1)) continue;
-                lines[i] += wordAndSpace;
-            }
-        }
-
-        return lines;
     }
 
     private static string AddControlCode(byte[] controlCode)

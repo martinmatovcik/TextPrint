@@ -13,7 +13,7 @@ public class Program
 
     static async Task Main()
     {
-        const bool printOnPrinter = false;
+        const bool printOnPrinter = true;
 
         if (printOnPrinter)
         {
@@ -223,7 +223,7 @@ public class Program
             PickUpInstruction =
                 "Vyzvednout: Embrace the journey",
             ReturnToInstruction =
-                "Vrátit: Embrace the journey, conquer challenges, and cherish the moments. Life is a canvas; paint it with passion. Shine brightly, the world awaits your brilliance.Embrace the journey, conquer challenges, and cherish the moments. Life is a canvas; paint it with passion. Shine brightly, the world awaits your brilliance.",
+                "Vrátit: Embrace the journey, conquer challenges, and cherish",
             Services =
                 "Služby: Embrace the journey, conquer challenges, and cherish the moments. Life is a canvas; paint it with passion. Shine brightly, the world awaits your brilliance.",
             Notes =
