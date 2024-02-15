@@ -386,41 +386,13 @@ public class CmrTextFileGenerator
 
         output += AddNewLines(2);
 
-
         //Services
-        var servicesLine = formData.Services;
+        var servicesLines = FormatTextInField20(formData.Services, Field20LineLength, 2);
+        output += servicesLines[0] + EndOfLine + servicesLines[1] + EndOfLine;
         
-        if (servicesLine.Length > Field20LineLength)
-        {
-            servicesLine = servicesLine.Insert(Field20LineLength, EndOfLine.ToString());
-        }
-
-        if (servicesLine.Length > Field20LineLength * 2)
-        {
-            servicesLine = servicesLine.Substring(0, Field20LineLength * 2 + 1);
-        }
-
-        output += servicesLine + EndOfLine;
-
         //Notes
-        var notesLine = formData.Notes;
-        var notesLineLength = notesLine.Length;
-        if (notesLineLength > Field20LineLength)
-        {
-            notesLine = notesLine.Insert(Field20LineLength, EndOfLine.ToString());
-        }
-
-        if (notesLineLength > Field20LineLength * 2)
-        {
-            notesLine = notesLine.Insert(Field20LineLength * 2, EndOfLine.ToString());
-        }
-
-        if (notesLineLength > Field20LineLength * 3)
-        {
-            notesLine = notesLine.Substring(0, Field20LineLength * 3 + 2);
-        }
-
-        output += notesLine;
+        var notesLine = FormatTextInField20(formData.Notes, Field20LineLength, 3);
+        output += notesLine[0] + EndOfLine + notesLine[1] + EndOfLine + notesLine[2];
         return output;
     }
 

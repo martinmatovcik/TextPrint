@@ -227,7 +227,7 @@ public class Program
             Services =
                 "Služby: Embrace the journey, conquer challenges, and cherish the moments. Life is a canvas; paint it with passion. Shine brightly, the world awaits your brilliance.",
             Notes =
-                "Poznámky: Embrace the journey, conquer challenges, and cherish the moments. Life is a canvas; paint it with pass"
+                "Poznámky: Embrace the journey, conquer challenges, and cherish the moments. Life is a canvas; paint it with pass. Life is a canvas; paint it with passion. Shine brightly, the world awaits your brilliance. Life is a canvas; paint it with passion. Shine brightly, the world awaits your brilliance."
         };
     }
 }
